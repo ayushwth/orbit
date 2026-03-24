@@ -513,10 +513,23 @@
             if (matchCard) matchCard.style.display = 'none';
             if (activityCard) activityCard.style.display = 'none';
             
-            // Clear stats mockup
-            document.getElementById('statMatches').textContent = '-';
-            document.getElementById('statChats').textContent = '-';
-            document.getElementById('statScore').textContent = '-%';
+            // Fetch real stats from match list
+            fetch('/match/list', { headers: { 'Authorization': `Bearer ${token}` } })
+              .then(r => r.json())
+              .then(matches => {
+                const matchCount = matches.length;
+                const avgMatch = matchCount > 0
+                  ? Math.round(matches.reduce((s, m) => s + (m.match_percent || 0), 0) / matchCount)
+                  : 0;
+                animateCount(document.getElementById('statMatches'), matchCount);
+                animateCount(document.getElementById('statChats'), matchCount); // each match has 1 convo
+                animateCount(document.getElementById('statScore'), avgMatch, '%');
+              })
+              .catch(() => {
+                document.getElementById('statMatches').textContent = '0';
+                document.getElementById('statChats').textContent = '0';
+                document.getElementById('statScore').textContent = '0%';
+              });
          }
       })
       .catch(e => {
@@ -536,11 +549,7 @@
     }
     requestAnimationFrame(tick);
   }
-  setTimeout(() => {
-    animateCount(document.getElementById('statMatches'), 12);
-    animateCount(document.getElementById('statChats'), 8);
-    animateCount(document.getElementById('statScore'), 91, '%');
-  }, 300);
+  // Stats are populated dynamically from fetch above — no hardcoded values
 
   gsap.from('.match-row',      { x: -20, opacity: 0, duration: 0.4, stagger: 0.08, ease: 'power3.out', delay: 0.5 });
   gsap.from('.timeline-item',  { x: -15, opacity: 0, duration: 0.35, stagger: 0.07, ease: 'power3.out', delay: 0.6 });
