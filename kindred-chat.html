@@ -723,7 +723,7 @@
 
 </div>
 
-<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script>
   // ── AUTH & STATE ──
   const token = localStorage.getItem('kindred_token');
@@ -753,7 +753,7 @@
       document.querySelector('.topbar-alias span').textContent = me.phantom_alias;
 
       // 2. Initialize Socket.IO
-      socket = io('http://localhost:3000', {
+      socket = io('', {
         auth: { token }
       });
 

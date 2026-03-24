@@ -26,6 +26,11 @@ app.use('/admin', adminRoutes);
 const path = require('path');
 app.use(express.static(path.join(__dirname, '../')));
 
+// Serve login page as the absolute default entry
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../kindred-login.html'));
+});
+
 // Fallback Basic route for API root
 app.get('/api', (req, res) => {
     res.json({ message: 'Welcome to Kindred Backend API' });
