@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindred — Join</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #f5f0e8;
+    --card: #ede8dc;
+    --accent: #c8432a;
+    --green: #2a6b4c;
+    --gold: #b8912a;
+    --muted: #7a6e60;
+    --border: rgba(13,13,13,0.1);
+    --serif: 'Playfair Display', serif;
+    --sans: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    width: 420px;
+    flex-shrink: 0;
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .left-panel::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(200,67,42,0.12) 0%, transparent 70%);
+    bottom: -100px; right: -100px;
+    pointer-events: none;
+  }
+  .left-panel::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(42,107,76,0.08) 0%, transparent 70%);
+    top: -50px; left: -50px;
+    pointer-events: none;
+  }
+  .lp-logo {
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    color: var(--paper);
+    letter-spacing: -0.02em;
+    position: relative; z-index: 1;
+  }
+  .lp-logo em { font-style: italic; color: var(--accent); }
+
+  .lp-mid { position: relative; z-index: 1; }
+  .lp-step-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .lp-title {
+    font-family: var(--serif);
+    font-size: 2.4rem;
+    line-height: 1.1;
+    color: var(--paper);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+  .lp-title em { font-style: italic; color: var(--accent); }
+  .lp-desc {
+    font-size: 0.88rem;
+    color: rgba(245,240,232,0.45);
+    line-height: 1.7;
+    max-width: 280px;
+  }
+
+  /* step dots */
+  .lp-steps { position: relative; z-index: 1; }
+  .step-dots {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+  .step-dot {
+    height: 3px;
+    border-radius: 99px;
+    background: rgba(245,240,232,0.15);
+    flex: 1;
+    transition: background 0.4s;
+  }
+  .step-dot.done { background: var(--green); }
+  .step-dot.active { background: var(--accent); }
+
+  .step-counter {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: rgba(245,240,232,0.3);
+  }
+  .step-counter span { color: var(--paper); }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  /* grain overlay */
+  .right-panel::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .form-container {
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── VIEWS ── */
+  .step-view { display: none; }
+  .step-view.active {
+    display: block;
+    animation: stepIn 0.45s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .form-title {
+    font-family: var(--serif);
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+  }
+  .form-title em { font-style: italic; color: var(--accent); }
+  .form-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+  }
+
+  .field { margin-bottom: 1.4rem; }
+  .field label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid var(--border);
+    padding: 0.7rem 0;
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: rgba(13,13,13,0.25); }
+  .field input:focus, .field textarea:focus { border-bottom-color: var(--accent); }
+  .field textarea { min-height: 90px; line-height: 1.6; }
+
+  .field-hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    letter-spacing: 0.02em;
+  }
+
+  /* char counter */
+  .char-counter {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 0.3rem;
+    transition: color 0.2s;
+  }
+  .char-counter.warn { color: var(--accent); }
+
+  /* password strength */
+  .pw-strength {
+    display: flex;
+    gap: 4px;
+    margin-top: 0.5rem;
+  }
+  .pw-bar {
+    height: 3px;
+    flex: 1;
+    border-radius: 99px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .pw-label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── INTEREST GRID ── */
+  .interest-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .i-card {
+    background: var(--card);
+    border: 1.5px solid transparent;
+    padding: 0.9rem 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  .i-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--card-color, var(--accent));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .i-card:hover::before { opacity: 0.08; }
+  .i-card.selected {
+    border-color: var(--card-color, var(--accent));
+    background: var(--paper);
+  }
+  .i-card.selected::before { opacity: 0.06; }
+  .i-emoji {
+    font-size: 1.3rem;
+    display: block;
+    margin-bottom: 0.4rem;
+    position: relative; z-index: 1;
+    transition: transform 0.2s;
+  }
+  .i-card:hover .i-emoji, .i-card.selected .i-emoji { transform: scale(1.15); }
+  .i-name {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink);
+    position: relative; z-index: 1;
+    line-height: 1.3;
+  }
+  .i-check {
+    position: absolute;
+    top: 0.5rem; right: 0.5rem;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(13,13,13,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.5rem;
+    color: transparent;
+    z-index: 1;
+    transition: all 0.2s;
+  }
+  .i-card.selected .i-check {
+    background: var(--card-color, var(--accent));
+    border-color: var(--card-color, var(--accent));
+    color: white;
+  }
+  .interest-count {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+  .interest-count span { color: var(--accent); font-weight: 500; }
+
+  /* ── IDEOLOGY PILLS ── */
+  .ideology-section { margin-bottom: 1.8rem; }
+  .ideology-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+  }
+  .ideology-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .ideology-pill {
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.2s;
+    background: transparent;
+    font-family: var(--sans);
+  }
+  .ideology-pill:hover {
+    border-color: rgba(13,13,13,0.25);
+    color: var(--ink);
+  }
+  .ideology-pill.selected {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  /* ── PHANTOM REVEAL ── */
+  .phantom-box {
+    background: var(--ink);
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .phantom-box::before {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(200,67,42,0.15) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .phantom-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.35);
+    margin-bottom: 0.8rem;
+  }
+  .phantom-alias {
+    font-family: var(--serif);
+    font-size: 2.2rem;
+    font-style: italic;
+    color: var(--paper);
+    letter-spacing: -0.02em;
+    position: relative; z-index: 1;
+  }
+  .phantom-alias span { color: var(--accent); }
+  .phantom-sub {
+    font-size: 0.78rem;
+    color: rgba(245,240,232,0.35);
+    margin-top: 0.6rem;
+    line-height: 1.6;
+  }
+
+  /* summary tags */
+  .summary-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .summary-tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 2px;
+  }
+  .summary-tag.accent {
+    border-color: rgba(200,67,42,0.4);
+    color: var(--accent);
+    background: rgba(200,67,42,0.05);
+  }
+  .summary-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    width: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1rem;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s;
+    margin-top: 0.5rem;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .btn-primary:hover::after { transform: translateX(0); }
+  .btn-primary span { position: relative; z-index: 1; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary:disabled::after { display: none; }
+
+  .btn-back {
+    background: none;
+    border: none;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s;
+  }
+  .btn-back:hover { color: var(--ink); }
+  .btn-back::before { content: '←'; }
+
+  .btn-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* signin link */
+  .signin-link {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 1.5rem;
+  }
+  .signin-link a {
+    color: var(--ink);
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 1px;
+  }
+
+  /* error */
+  .field-error {
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-top: 0.35rem;
+    display: none;
+  }
+  .field-error.visible { display: block; }
+
+  /* success tick */
+  .success-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    margin: 0 auto 1.5rem;
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  @media (max-width: 768px) {
+    .left-panel { display: none; }
+    .right-panel { padding: 2rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="lp-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Kind<em>red</em></a></div>
+
+  <div class="lp-mid">
+    <div class="lp-step-label" id="lpStepLabel">Step 1 of 4</div>
+    <div class="lp-title" id="lpTitle">Create your <em>account.</em></div>
+    <div class="lp-desc" id="lpDesc">Just the basics — username and a password. No real name, no photo. You control how much you share.</div>
+  </div>
+
+  <div class="lp-steps">
+    <div class="step-dots">
+      <div class="step-dot active" id="dot0"></div>
+      <div class="step-dot" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+    </div>
+    <div class="step-counter"><span id="stepNum">1</span> / 4</div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="form-container">
+
+    <!-- ══ STEP 1: Account ══ -->
+    <div class="step-view active" id="step0">
+      <div class="form-title">Hello, <em>stranger.</em></div>
+      <div class="form-sub">Pick a username. Nobody sees your real name — ever.</div>
+
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="something_interesting" maxlength="24" autocomplete="off" />
+        <div class="field-hint">Letters, numbers, underscores. Max 24 chars.</div>
+        <div class="field-error" id="usernameError">Username must be at least 3 characters.</div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="make it good" />
+        <div class="pw-strength">
+          <div class="pw-bar" id="pwBar0"></div>
+          <div class="pw-bar" id="pwBar1"></div>
+          <div class="pw-bar" id="pwBar2"></div>
+          <div class="pw-bar" id="pwBar3"></div>
+        </div>
+        <div class="pw-label" id="pwLabel">Enter a password</div>
+        <div class="field-error" id="passwordError">Password must be at least 8 characters.</div>
+      </div>
+
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="same as above" />
+        <div class="field-error" id="confirmError">Passwords do not match.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" onclick="goStep(1)"><span>Continue →</span></button>
+      </div>
+      <div class="signin-link">Already have an account? <a href="kindred-chat.html">Sign in</a></div>
+    </div>
+
+    <!-- ══ STEP 2: Interests ══ -->
+    <div class="step-view" id="step1">
+      <div class="form-title">What are you <em>into?</em></div>
+      <div class="form-sub">Pick at least 3 interests. This is how we find your people.</div>
+
+      <div class="interest-count">Selected: <span id="intCount">0</span> / 3 minimum</div>
+      <div class="interest-grid" id="interestGrid"></div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="intNextBtn" onclick="goStep(2)" disabled><span>Continue →</span></button>
+        <button class="btn-back" onclick="goStep(0)">Back</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 3: Bio & Values ══ -->
+    <div class="step-view" id="step2">
+      <div class="form-title">Tell them <em>something.</em></div>
+      <div class="form-sub">A line or two about what's on your mind. Keep it honest.</div>
+
+      <div class="field">
+        <label>Your Bio</label>
+        <textarea id="bio" placeholder="e.g. obsessed with free will debates and bad jazz. looking for people who think too much." maxlength="160"></textarea>
+        <div class="char-counter" id="bioCounter">0 / 160</div>
+      </div>
+
+      <div class="ideology-section">
+        <div class="ideology-label">How do you see the world?</div>
+        <div class="ideology-pills" id="ideologyPills"></div>
+      </div>
+
+      <div class="ideology-section">
+        <div class="ideology-label">Your vibe</div>
+        <div class="ideology-pills" id="vibePills"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" onclick="goStep(3)"><span>Continue →</span></button>
+        <button class="btn-back" onclick="goStep(1)">Back</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 4: Phantom reveal ══ -->
+    <div class="step-view" id="step3">
+      <div class="form-title">Meet your <em>alter ego.</em></div>
+      <div class="form-sub">This is how everyone will know you. You can always reveal yourself later.</div>
+
+      <div class="phantom-box">
+        <div class="phantom-eyebrow">Your anonymous identity</div>
+        <div class="phantom-alias">Phantom <span id="phantomNum">#7741</span></div>
+        <div class="phantom-sub">Your real username is hidden. Only you know who you are.</div>
+      </div>
+
+      <div class="summary-label">Your interests</div>
+      <div class="summary-row" id="summaryInterests"></div>
+
+      <div class="summary-label" style="margin-top:0.5rem">Your values</div>
+      <div class="summary-row" id="summaryValues"></div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="submitBtn" onclick="submitRegistration()"><span>Enter Kindred ✦</span></button>
+        <button class="btn-back" onclick="goStep(2)">Back</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 5: Done ══ -->
+    <div class="step-view" id="step4">
+      <div style="text-align:center; padding: 2rem 0;">
+        <div class="success-icon">✦</div>
+        <div class="form-title" style="text-align:center">You're <em>in.</em></div>
+        <div class="form-sub" style="text-align:center; margin-bottom:2.5rem;">Your phantom identity is ready. Time to find your people.</div>
+        <button class="btn-primary" onclick="window.location.href='kindred-chat.html'"><span>Go to Discover →</span></button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── LEFT PANEL CONTENT PER STEP ──
+  const panelContent = [
+    {
+      label: 'Step 1 of 4',
+      title: 'Create your <em>account.</em>',
+      desc: 'Just the basics — username and a password. No real name, no photo. You control how much you share.',
+    },
+    {
+      label: 'Step 2 of 4',
+      title: 'Pick your <em>world.</em>',
+      desc: 'Your interests shape who you meet. Choose what genuinely excites you — not what sounds cool.',
+    },
+    {
+      label: 'Step 3 of 4',
+      title: 'Show them <em>you.</em>',
+      desc: 'A short bio and a few values help us match you with people who actually get it.',
+    },
+    {
+      label: 'Step 4 of 4',
+      title: 'Your phantom <em>identity.</em>',
+      desc: 'You get a random alias. No one knows who you are until you decide to tell them.',
+    },
+    {
+      label: 'All done!',
+      title: 'Welcome to <em>Kindred.</em>',
+      desc: 'Your anonymous journey starts now. Go find your people.',
+    },
+  ];
+
+  // ── INTERESTS DATA ──
+  const interests = [
+    { emoji: '🧠', name: 'Philosophy', color: '#c8432a' },
+    { emoji: '💻', name: 'Open Source', color: '#2a6b4c' },
+    { emoji: '🎬', name: 'Indie Cinema', color: '#5a3fa0' },
+    { emoji: '🌿', name: 'Climate', color: '#2a7a52' },
+    { emoji: '🎷', name: 'Jazz & Music', color: '#b07d2a' },
+    { emoji: '✍️', name: 'Poetry', color: '#c8432a' },
+    { emoji: '🚀', name: 'Startups', color: '#1a6fa8' },
+    { emoji: '🤖', name: 'AI & ML', color: '#5a3fa0' },
+    { emoji: '📖', name: 'Literature', color: '#b07d2a' },
+    { emoji: '⚖️', name: 'Politics', color: '#8a3a2a' },
+    { emoji: '🌌', name: 'Astronomy', color: '#1a6fa8' },
+    { emoji: '♟️', name: 'Chess', color: '#2a6b4c' },
+    { emoji: '🎭', name: 'Theatre', color: '#7a3a7a' },
+    { emoji: '🧬', name: 'Neuroscience', color: '#2a7a52' },
+    { emoji: '📐', name: 'Design', color: '#b07d2a' },
+  ];
+
+  const ideologies = ['Rationalist', 'Idealist', 'Pragmatist', 'Stoic', 'Existentialist', 'Optimist', 'Skeptic', 'Humanist'];
+  const vibes = ['Deep thinker', 'Night owl', 'Quiet rebel', 'Overthinker', 'Empath', 'Contrarian', 'Builder', 'Dreamer'];
+
+  // ── STATE ──
+  let selectedInterests = new Set();
+  let selectedIdeologies = new Set();
+  let selectedVibes = new Set();
+  let currentStep = 0;
+
+  // ── BUILD INTEREST GRID ──
+  const igrid = document.getElementById('interestGrid');
+  interests.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'i-card';
+    card.style.setProperty('--card-color', item.color);
+    card.innerHTML = `
+      <span class="i-emoji">${item.emoji}</span>
+      <div class="i-name">${item.name}</div>
+      <div class="i-check">✓</div>
+    `;
+    card.addEventListener('click', () => {
+      const sel = card.classList.toggle('selected');
+      if (sel) selectedInterests.add(item.name);
+      else selectedInterests.delete(item.name);
+      document.getElementById('intCount').textContent = selectedInterests.size;
+      document.getElementById('intNextBtn').disabled = selectedInterests.size < 3;
+    });
+    igrid.appendChild(card);
+  });
+
+  // ── BUILD IDEOLOGY PILLS ──
+  function buildPills(container, data, store) {
+    data.forEach(label => {
+      const pill = document.createElement('button');
+      pill.className = 'ideology-pill';
+      pill.textContent = label;
+      pill.addEventListener('click', () => {
+        const sel = pill.classList.toggle('selected');
+        if (sel) store.add(label);
+        else store.delete(label);
+      });
+      container.appendChild(pill);
+    });
+  }
+  buildPills(document.getElementById('ideologyPills'), ideologies, selectedIdeologies);
+  buildPills(document.getElementById('vibePills'), vibes, selectedVibes);
+
+  // ── BIO CHAR COUNTER ──
+  const bioEl = document.getElementById('bio');
+  const bioCounter = document.getElementById('bioCounter');
+  bioEl.addEventListener('input', () => {
+    const len = bioEl.value.length;
+    bioCounter.textContent = `${len} / 160`;
+    bioCounter.classList.toggle('warn', len > 140);
+  });
+
+  // ── PASSWORD STRENGTH ──
+  const pwInput = document.getElementById('password');
+  pwInput.addEventListener('input', () => {
+    const val = pwInput.value;
+    const bars = [0,1,2,3].map(i => document.getElementById(`pwBar${i}`));
+    const colors = ['#c8432a','#b07d2a','#2a6b4c','#1a6fa8'];
+    const labels = ['Too weak','Getting there','Pretty good','Strong ✦'];
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    bars.forEach((b, i) => {
+      b.style.background = i < score ? colors[score - 1] : 'rgba(13,13,13,0.1)';
+    });
+    document.getElementById('pwLabel').textContent = val.length ? labels[Math.max(0, score - 1)] : 'Enter a password';
+  });
+
+  // ── STEP NAVIGATION ──
+  function goStep(n) {
+    // validate step 0
+    if (currentStep === 0 && n === 1) {
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value;
+      const c = document.getElementById('confirmPassword').value;
+      let ok = true;
+      document.getElementById('usernameError').classList.toggle('visible', u.length < 3);
+      if (u.length < 3) ok = false;
+      document.getElementById('passwordError').classList.toggle('visible', p.length < 8);
+      if (p.length < 8) ok = false;
+      document.getElementById('confirmError').classList.toggle('visible', p !== c);
+      if (p !== c) ok = false;
+      if (!ok) return;
+    }
+
+    // build summary before step 3
+    if (n === 3) buildSummary();
+
+    // hide current, show next
+    document.getElementById(`step${currentStep}`).classList.remove('active');
+    currentStep = n;
+    document.getElementById(`step${currentStep}`).classList.add('active');
+
+    // update dots
+    [0,1,2,3].forEach(i => {
+      const dot = document.getElementById(`dot${i}`);
+      dot.classList.remove('active', 'done');
+      if (i < n) dot.classList.add('done');
+      else if (i === n) dot.classList.add('active');
+    });
+
+    // update left panel
+    const p = panelContent[Math.min(n, 4)];
+    document.getElementById('lpStepLabel').textContent = p.label;
+    document.getElementById('lpTitle').innerHTML = p.title;
+    document.getElementById('lpDesc').textContent = p.desc;
+    document.getElementById('stepNum').textContent = Math.min(n + 1, 4);
+  }
+
+  // ── BUILD SUMMARY ──
+  function buildSummary() {
+    // random phantom number
+    document.getElementById('phantomNum').textContent = '#' + Math.floor(1000 + Math.random() * 8999);
+
+    const si = document.getElementById('summaryInterests');
+    si.innerHTML = '';
+    selectedInterests.forEach(t => {
+      const el = document.createElement('span');
+      el.className = 'summary-tag accent';
+      el.textContent = t;
+      si.appendChild(el);
+    });
+
+    const sv = document.getElementById('summaryValues');
+    sv.innerHTML = '';
+    [...selectedIdeologies, ...selectedVibes].forEach(t => {
+      const el = document.createElement('span');
+      el.className = 'summary-tag';
+      el.textContent = t;
+      sv.appendChild(el);
+    });
+    if (sv.children.length === 0) {
+      sv.innerHTML = '<span class="summary-tag" style="opacity:0.4">None selected</span>';
+    }
+  }
+
+  // ── SUBMIT TO BACKEND ──
+  async function submitRegistration() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Creating...';
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const bio = document.getElementById('bio').value.trim();
+    const interests_arr = Array.from(selectedInterests);
+    const vibe = selectedVibes.size > 0 ? Array.from(selectedVibes).join(', ') : '';
+    const ideology = selectedIdeologies.size > 0 ? Array.from(selectedIdeologies).join(', ') : '';
+
+    try {
+        const response = await fetch('http://localhost:3000/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username,
+                password,
+                bio,
+                interests: interests_arr,
+                vibe,
+                ideology
+            })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Save their token so they stay logged in!
+            localStorage.setItem('kindred_token', data.token);
+            
+            // Re-update the summary UI with their ACTUAL generated phantom_alias
+            const actualPhantom = data.user.phantom_alias;
+            document.getElementById('phantomNum').textContent = actualPhantom;
+            
+            // Advance to the final success screen
+            goStep(4);
+        } else {
+            alert('Signup failed: ' + data.error);
+            btn.disabled = false;
+            btn.querySelector('span').textContent = 'Enter Kindred ✦';
+        }
+    } catch (err) {
+        console.error('Error connecting to backend:', err);
+        alert('Network error. Is the server running?');
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Enter Kindred ✦';
+    }
+  }
+</script>
+
+<script>
+  // ── Initial page entrance ──
+  gsap.from('.lp-logo',       { y: -30, opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.1 });
+  gsap.from('.lp-mid',        { y: 40,  opacity: 0, duration: 0.8, ease: 'power3.out', delay: 0.3 });
+  gsap.from('.lp-steps',      { y: 20,  opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.5 });
+  gsap.from('.form-container',{ x: 40,  opacity: 0, duration: 0.9, ease: 'power3.out', delay: 0.2 });
+
+  // ── Step transition with GSAP (patch goStep) ──
+  const _goStep = goStep;
+  window.goStep = function(n) {
+    const currentEl = document.querySelector('.step-view.active');
+    const direction = n > currentStep ? 1 : -1;
+    if (currentEl) {
+      gsap.to(currentEl, {
+        x: -60 * direction, opacity: 0, duration: 0.3, ease: 'power2.in',
+        onComplete: () => {
+          _goStep(n);
+          const nextEl = document.getElementById('step' + n);
+          gsap.fromTo(nextEl,
+            { x: 60 * direction, opacity: 0 },
+            { x: 0, opacity: 1, duration: 0.45, ease: 'power3.out',
+              onComplete: () => gsap.set(nextEl, { clearProps: 'all' }) }
+          );
+          // stagger fields
+          gsap.from(nextEl.querySelectorAll('.field, .ideology-section, .phantom-box, .summary-row, .interest-grid, .btn-primary'), {
+            y: 18, opacity: 0, duration: 0.4, stagger: 0.08, ease: 'power2.out', delay: 0.1,
+            onComplete: function() { gsap.set(this.targets(), { clearProps: 'all' }); }
+          });
+          // update left panel with animation
+          gsap.fromTo('.lp-mid', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out', delay: 0.1 });
+        }
+      });
+    } else {
+      _goStep(n);
+    }
+  };
+
+  // ── Interest card hover pop ──
+  document.addEventListener('click', e => {
+    const card = e.target.closest('.i-card');
+    if (!card) return;
+    gsap.fromTo(card, { scale: 0.9 }, { scale: 1, duration: 0.5, ease: 'elastic.out(1.2, 0.4)' });
+  });
+
+  // ── Ideology pill bounce ──
+  document.addEventListener('click', e => {
+    const pill = e.target.closest('.ideology-pill');
+    if (!pill) return;
+    gsap.fromTo(pill, { scale: 0.88 }, { scale: 1, duration: 0.4, ease: 'elastic.out(1.2, 0.4)' });
+  });
+
+  // ── CTA button magnetic ──
+  document.querySelectorAll('.btn-primary').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      gsap.to(btn, { x: (e.clientX - r.left - r.width/2) * 0.2, y: (e.clientY - r.top - r.height/2) * 0.2, duration: 0.35, ease: 'power2.out' });
+    });
+    btn.addEventListener('mouseleave', () => {
+      gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)' });
+    });
+  });
+
+  // ── Phantom number count-up animation ──
+  const origBuildSummary = buildSummary;
+  window.buildSummary = function() {
+    origBuildSummary();
+    // animate phantom number counting up
+    const numEl = document.getElementById('phantomNum');
+    const target = parseInt(numEl.textContent.replace('#',''));
+    let current = 1000;
+    gsap.to({}, {
+      duration: 1.2, ease: 'power2.out',
+      onUpdate: function() {
+        current = Math.floor(1000 + (target - 1000) * this.progress());
+        numEl.textContent = '#' + current;
+      }
+    });
+    gsap.from('.phantom-box',     { scale: 0.85, opacity: 0, duration: 0.7, ease: 'back.out(1.4)', delay: 0.1 });
+    gsap.from('.summary-tag',     { y: 12, opacity: 0, duration: 0.4, stagger: 0.06, ease: 'power2.out', delay: 0.3 });
+  };
+
+  // ── Success icon bounce ──
+  const observer = new MutationObserver(() => {
+    const icon = document.querySelector('.success-icon');
+    if (icon) {
+      // First make everything visible, then animate from
+      gsap.set('#step4 .form-title, #step4 .form-sub, #step4 .btn-primary', { opacity: 1, y: 0 });
+      gsap.from(icon, { scale: 0, rotation: -15, duration: 0.7, ease: 'back.out(1.7)' });
+      gsap.from('#step4 .form-title', { y: 20, opacity: 0, duration: 0.5, ease: 'power3.out', delay: 0.35 });
+      gsap.from('#step4 .form-sub',   { y: 20, opacity: 0, duration: 0.5, ease: 'power3.out', delay: 0.5  });
+      gsap.from('#step4 .btn-primary',{ y: 20, opacity: 0, duration: 0.5, ease: 'power3.out', delay: 0.65 });
+      observer.disconnect(); // run once only
+    }
+  });
+  observer.observe(document.body, { subtree: true, childList: true });
+</script>
+</body>
+</html>

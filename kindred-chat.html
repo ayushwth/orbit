@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindred — Match & Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --surface: #111114;
+    --surface2: #17171b;
+    --border: rgba(255,255,255,0.07);
+    --border-lit: rgba(255,255,255,0.14);
+    --text: #e8e4dc;
+    --muted: rgba(232,228,220,0.38);
+    --accent: #c8432a;
+    --green: #2a7a52;
+    --gold: #b8912a;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Cormorant Garamond', serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.8rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .topbar-logo {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .topbar-logo em { font-style: italic; color: var(--accent); }
+  .topbar-tabs {
+    display: flex;
+    gap: 0.3rem;
+    background: var(--bg);
+    padding: 0.3rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 0.4rem 1.2rem;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border-lit);
+  }
+  .topbar-alias {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .topbar-alias span { color: var(--accent); }
+
+  /* ── MAIN LAYOUT ── */
+  .app {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── VIEWS ── */
+  .view { display: none; width: 100%; }
+  .view.active { display: flex; }
+
+  /* ══════════════════════════════════
+     MATCH VIEW — tinder cards
+  ══════════════════════════════════ */
+  .match-view {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .match-view::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(200,67,42,0.06) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .match-header {
+    text-align: center;
+    z-index: 1;
+  }
+  .match-header h2 {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+  }
+  .match-header h2 em { font-style: italic; color: var(--accent); }
+  .match-header p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* card stack */
+  .card-stack {
+    position: relative;
+    width: 340px;
+    height: 420px;
+    z-index: 1;
+  }
+  .match-card {
+    position: absolute;
+    inset: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s ease, opacity 0.15s;
+    cursor: grab;
+    user-select: none;
+    overflow: hidden;
+  }
+  .match-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .match-card.dragging { cursor: grabbing; transition: none !important; }
+  .match-card.swipe-right {
+    transform: translateX(120%) rotate(12deg) !important;
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.3s;
+  }
+  .match-card.swipe-left {
+    transform: translateX(-120%) rotate(-12deg) !important;
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.3s;
+  }
+
+  /* like/nope overlay */
+  .card-like-label, .card-nope-label {
+    position: absolute;
+    top: 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    padding: 0.3rem 0.8rem;
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 0.1s;
+    pointer-events: none;
+  }
+  .card-like-label {
+    right: 1.5rem;
+    color: var(--green);
+    border: 1.5px solid var(--green);
+  }
+  .card-nope-label {
+    left: 1.5rem;
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+  }
+
+  .card-phantom {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+  }
+  .card-phantom span { color: var(--accent); }
+  .card-avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border-lit);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    font-style: italic;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+  }
+  .card-bio {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-style: italic;
+    color: rgba(232,228,220,0.7);
+    line-height: 1.6;
+    flex: 1;
+    margin-bottom: 1.2rem;
+  }
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.2rem;
+  }
+  .card-tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--border-lit);
+    color: var(--muted);
+    border-radius: 2px;
+  }
+  .card-tag.match {
+    border-color: var(--green);
+    color: #5ecf96;
+    background: rgba(42,122,82,0.1);
+  }
+  .card-match-pct {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .card-match-pct span {
+    color: var(--green);
+    font-size: 1rem;
+    font-family: var(--serif);
+    font-style: italic;
+  }
+
+  /* action buttons */
+  .match-actions {
+    display: flex;
+    gap: 1.2rem;
+    z-index: 1;
+  }
+  .action-btn {
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    border: 1px solid var(--border-lit);
+    background: var(--surface);
+    font-size: 1.3rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  }
+  .action-btn:hover { transform: scale(1.1); }
+  .action-btn.pass:hover { border-color: var(--accent); background: rgba(200,67,42,0.12); }
+  .action-btn.connect:hover { border-color: var(--green); background: rgba(42,122,82,0.12); }
+
+  /* ══════════════════════════════════
+     CHAT VIEW
+  ══════════════════════════════════ */
+  .chat-view {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  /* sidebar */
+  .chat-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+  }
+  .sidebar-header {
+    padding: 1.2rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-header h3 {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin-bottom: 0.8rem;
+  }
+  .sidebar-search {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.9rem;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--text);
+    outline: none;
+    border-radius: 2px;
+  }
+  .sidebar-search::placeholder { color: var(--muted); }
+  .sidebar-search:focus { border-color: var(--border-lit); }
+
+  .convo-list { flex: 1; overflow-y: auto; }
+  .convo-list::-webkit-scrollbar { width: 3px; }
+  .convo-list::-webkit-scrollbar-thumb { background: var(--border-lit); }
+  .convo-item {
+    padding: 1rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+  }
+  .convo-item:hover { background: var(--surface2); }
+  .convo-item.active { background: var(--surface2); border-left: 2px solid var(--accent); }
+  .convo-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--border-lit);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .convo-info { flex: 1; min-width: 0; }
+  .convo-name {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+  .convo-preview {
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .convo-unread {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .convo-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+  .convo-match-pct {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    padding: 0.18rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(200,67,42,0.1);
+    border: 1px solid rgba(200,67,42,0.3);
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .convo-match-pct.high {
+    background: rgba(42,122,82,0.12);
+    border-color: rgba(42,122,82,0.3);
+    color: #5ecf96;
+  }
+  .convo-match-pct.mid {
+    color: var(--gold);
+    background: rgba(184,145,42,0.1);
+    border-color: rgba(184,145,42,0.3);
+  }
+
+  /* main chat area */
+  .chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .chat-topbar {
+    padding: 1rem 1.6rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .chat-topbar-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--border-lit);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--muted);
+  }
+  .chat-topbar-info { flex: 1; }
+  .chat-topbar-name {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+  .chat-topbar-tags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .topbar-tag {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 2px;
+  }
+  .topbar-tag.shared {
+    border-color: rgba(42,122,82,0.5);
+    color: #5ecf96;
+    background: rgba(42,122,82,0.08);
+  }
+  .anon-tag {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid rgba(200,67,42,0.4);
+    color: var(--accent);
+    border-radius: 2px;
+    background: rgba(200,67,42,0.06);
+  }
+  .topbar-match-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid rgba(42,122,82,0.35);
+    border-radius: 4px;
+    background: rgba(42,122,82,0.07);
+    min-width: 64px;
+    gap: 0.1rem;
+  }
+  .topbar-match-num {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #5ecf96;
+    line-height: 1;
+  }
+  .topbar-match-label {
+    font-family: var(--mono);
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    color: rgba(94,207,150,0.6);
+    text-transform: uppercase;
+  }
+  .topbar-shared-label {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-top: 0.15rem;
+  }
+  .topbar-shared-label span { color: #5ecf96; }
+
+  /* messages */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .chat-messages::-webkit-scrollbar { width: 3px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .msg-row {
+    display: flex;
+    gap: 0.7rem;
+    max-width: 72%;
+    opacity: 0;
+    animation: msgIn 0.35s forwards;
+  }
+  .msg-row.me { align-self: flex-end; flex-direction: row-reverse; }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .msg-avatar-sm {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif);
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .msg-bubble {
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    border-radius: 2px;
+    position: relative;
+  }
+  .msg-row.them .msg-bubble {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 0 8px 8px 8px;
+  }
+  .msg-row.me .msg-bubble {
+    background: rgba(200,67,42,0.15);
+    border: 1px solid rgba(200,67,42,0.25);
+    color: var(--text);
+    border-radius: 8px 0 8px 8px;
+  }
+  .msg-time {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    letter-spacing: 0.06em;
+  }
+  .msg-row.me .msg-time { text-align: right; }
+
+  /* date divider */
+  .date-divider {
+    display: flex; align-items: center; gap: 1rem;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 0.5rem 0;
+  }
+  .date-divider::before, .date-divider::after {
+    content: ''; flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* typing indicator */
+  .typing-row {
+    display: flex; gap: 0.7rem; align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .typing-row.visible { opacity: 1; }
+  .typing-bubble {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    border-radius: 0 8px 8px 8px;
+    display: flex; gap: 4px; align-items: center;
+  }
+  .typing-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: typingBounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* input bar */
+  .chat-input-bar {
+    padding: 1rem 1.6rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .chat-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.7rem 1.1rem;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    color: var(--text);
+    outline: none;
+    border-radius: 2px;
+    transition: border-color 0.2s;
+  }
+  .chat-input:focus { border-color: var(--border-lit); }
+  .chat-input::placeholder { color: var(--muted); }
+  .send-btn {
+    width: 40px; height: 40px;
+    background: var(--accent);
+    border: none;
+    border-radius: 2px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, transform 0.15s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover { background: #a8361f; transform: scale(1.05); }
+
+  /* ── empty state ── */
+  .empty-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--muted);
+  }
+  .empty-chat-icon {
+    font-family: var(--serif);
+    font-size: 3rem;
+    font-style: italic;
+    opacity: 0.2;
+  }
+  .empty-chat p {
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Kind<em>red</em></a></div>
+  <div style="display:flex;align-items:center;gap:1.5rem;margin-left:auto;padding-right:1rem">
+    <a href="kindred-profile.html" style="font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.4);text-decoration:none;font-family:'DM Sans',sans-serif;transition:color 0.2s" onmouseover="this.style.color='rgba(245,240,232,0.85)'" onmouseout="this.style.color='rgba(245,240,232,0.4)'">Profile</a>
+  </div>
+  <div class="topbar-tabs">
+    <button class="tab-btn active" onclick="switchView('match', this)">Discover</button>
+    <button class="tab-btn" onclick="switchView('chat', this)">Messages</button>
+    <a href="kindred-profile.html" style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;color:rgba(232,228,220,0.45);text-decoration:none;padding:0.4rem 1rem;border:1px solid rgba(255,255,255,0.08);border-radius:999px;transition:all 0.2s;" onmouseover="this.style.color='#e8e4dc'" onmouseout="this.style.color='rgba(232,228,220,0.45)'">Profile</a>
+  </div>
+  <div class="topbar-alias">You are <span>Phantom #7741</span></div>
+</div>
+
+<div class="app">
+
+  <!-- ══ MATCH VIEW ══ -->
+  <div class="view match-view active" id="matchView">
+    <div class="match-header">
+      <h2>Find your <em>kind</em></h2>
+      <p>Swipe right to connect · left to pass</p>
+    </div>
+
+    <div class="card-stack" id="cardStack"></div>
+
+    <div class="match-actions">
+      <button class="action-btn pass" onclick="swipeCard('left')" title="Pass">✕</button>
+      <button class="action-btn connect" onclick="swipeCard('right')" title="Connect">✦</button>
+    </div>
+  </div>
+
+  <!-- ══ CHAT VIEW ══ -->
+  <div class="view chat-view" id="chatView">
+    <!-- sidebar -->
+    <div class="chat-sidebar">
+      <div class="sidebar-header">
+        <h3>Messages</h3>
+        <input class="sidebar-search" type="text" placeholder="Search conversations…" />
+      </div>
+      <div class="convo-list" id="convoList"></div>
+    </div>
+
+    <!-- main -->
+    <div class="chat-main" id="chatMain">
+      <div class="empty-chat" id="emptyChat">
+        <div class="empty-chat-icon">∅</div>
+        <p>Select a conversation to start</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<script>
+  // ── AUTH & STATE ──
+  const token = localStorage.getItem('kindred_token');
+  if (!token) {
+    window.location.href = 'kindred-login.html';
+  }
+
+  let me = null;
+  let myInterests = [];
+  let cards = [];
+  let convos = [];
+  let socket = null;
+
+  // ── INITIALIZE ──
+  async function init() {
+    try {
+      // 1. Fetch my profile
+      const meRes = await fetch('/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!meRes.ok) throw new Error('Not authenticated');
+      
+      const meData = await meRes.json();
+      me = meData;
+      myInterests = meData.interests || [];
+
+      document.querySelector('.topbar-alias span').textContent = me.phantom_alias;
+
+      // 2. Initialize Socket.IO
+      socket = io('http://localhost:3000', {
+        auth: { token }
+      });
+
+      socket.on('connect', () => console.log('Connected to chat server'));
+      
+      socket.on('new_match', (data) => {
+        // Refresh conversations when a new match happens
+        loadConvos();
+      });
+
+      socket.on('new_message', (msg) => {
+        // Update convo list
+        const convo = convos.find(c => c.conversation_id === msg.conversation_id);
+        if (convo) {
+          convo.preview = msg.content.substring(0, 32);
+          if (activeConvo !== convo.conversation_id) convo.unread = true;
+          convo.messages.push({
+            id: msg.id,
+            from: 'them',
+            text: msg.content,
+            time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+          buildConvoList();
+          
+          if (activeConvo === msg.conversation_id) {
+            appendMessage({
+              from: 'them',
+              text: msg.content,
+              time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              initial: convo.initial
+            });
+            // Let server know we read it (if read receipts implemented)
+          }
+        } else {
+          loadConvos(); // if we don't have the convo loaded yet
+        }
+      });
+
+      // 3. Load Discover Cards & Chats
+      loadDiscover();
+      loadConvos();
+
+    } catch (err) {
+      console.error(err);
+      window.location.href = 'kindred-login.html';
+    }
+  }
+
+  // ── FETCH CARDS ──
+  async function loadDiscover() {
+    try {
+      const res = await fetch('/match/discover', { headers: { 'Authorization': `Bearer ${token}` } });
+      const rawUsers = await res.json();
+      
+      cards = rawUsers.map(u => {
+        // Calculate dynamic match % locally for display (or server can do it)
+        const tags = u.interests || [];
+        const shared = tags.filter(t => myInterests.includes(t)).length;
+        const total = new Set([...tags, ...myInterests]).size;
+        const matchPct = total > 0 ? Math.round((shared / total) * 100) : 0;
+
+        return {
+          id: u.id,
+          alias: u.phantom_alias,
+          initial: u.phantom_alias.replace('Phantom #', '')[0] || '?',
+          bio: u.bio || '',
+          tags: tags,
+          myTags: myInterests,
+          match: matchPct
+        };
+      });
+      
+      cardIndex = 0;
+      buildCards();
+    } catch (err) {
+      console.error('Discover error:', err);
+    }
+  }
+
+  // ── FETCH CONVOS ──
+  async function loadConvos() {
+    try {
+      const res = await fetch('/match/list', { headers: { 'Authorization': `Bearer ${token}` } });
+      const matches = await res.json();
+      
+      // We need to fetch messages for these convos too, but let's just get the latest setup
+      convos = await Promise.all(matches.map(async m => {
+        const msgRes = await fetch(`/chat/messages/${m.conversation_id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const msgs = await msgRes.json();
+        
+        const tags = m.interests || [];
+        const sharedTags = tags.filter(t => myInterests.includes(t));
+
+        const formattedMsgs = msgs.reverse().map(msg => ({
+          id: msg.id,
+          from: msg.sender_id === me.id ? 'me' : 'them',
+          text: msg.content,
+          time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }));
+
+        const lastMsg = formattedMsgs[formattedMsgs.length - 1];
+
+        return {
+          conversation_id: m.conversation_id,
+          match_id: m.match_id,
+          alias: m.phantom_alias,
+          initial: m.phantom_alias.replace('Phantom #', '')[0] || '?',
+          match: m.match_percent,
+          sharedTags: sharedTags,
+          allTags: tags,
+          unread: false, // Could compute this if we track last_read
+          preview: lastMsg ? lastMsg.text.substring(0, 32) : 'New match!',
+          messages: formattedMsgs
+        };
+      }));
+
+      buildConvoList();
+      if (activeConvo) openConvo(activeConvo);
+
+    } catch (err) {
+      console.error('Convo load error:', err);
+    }
+  }
+
+
+  // ── CARD STACK ──
+  let cardIndex = 0;
+  const stack = document.getElementById('cardStack');
+
+  function buildCards() {
+    stack.innerHTML = '';
+    
+    if (cards.length === 0 || cardIndex >= cards.length) {
+      stack.innerHTML = '<div style="color:var(--muted); text-align:center; padding-top: 50%;">Nobody new right now.<br>Check back later.</div>';
+      return;
+    }
+
+    const visible = cards.slice(cardIndex, cardIndex + 3);
+    // render back-to-front so top card is last in DOM
+    [...visible].reverse().forEach((c, reverseI) => {
+      const stackPos = visible.length - 1 - reverseI; // 0 = top card
+      const card = document.createElement('div');
+      card.className = 'match-card';
+      card.dataset.id = c.id;
+
+      const tagsHtml = c.tags.map(t => {
+        const isShared = c.myTags.includes(t);
+        return `<span class="card-tag${isShared ? ' match' : ''}">${isShared ? '✦ ' : ''}${t}</span>`;
+      }).join('');
+
+      card.innerHTML = `
+        <div class="card-like-label">CONNECT</div>
+        <div class="card-nope-label">PASS</div>
+        <div class="card-phantom">YOU ARE TALKING TO <span>${c.alias}</span></div>
+        <div class="card-avatar">${c.initial}</div>
+        <div class="card-bio">"${c.bio}"</div>
+        <div class="card-tags">${tagsHtml}</div>
+        <div class="card-match-pct"><span>${c.match}%</span> interest match</div>
+      `;
+
+      // apply stacking style based on position
+      card.style.zIndex = visible.length - stackPos;
+      if (stackPos === 0) {
+        // top card — fully visible, interactive
+        card.style.transform = 'translateY(0px) scale(1)';
+        card.style.opacity = '1';
+        card.style.pointerEvents = 'auto';
+      } else if (stackPos === 1) {
+        card.style.transform = 'translateY(12px) scale(0.96)';
+        card.style.opacity = '0.6';
+        card.style.pointerEvents = 'none';
+      } else {
+        card.style.transform = 'translateY(24px) scale(0.92)';
+        card.style.opacity = '0.3';
+        card.style.pointerEvents = 'none';
+      }
+
+      // drag logic — only on top card
+      if (stackPos === 0) {
+        let startX, startY, isDragging = false;
+        card.addEventListener('mousedown', e => {
+          startX = e.clientX; startY = e.clientY;
+          isDragging = true;
+          card.classList.add('dragging');
+        });
+        document.addEventListener('mousemove', e => {
+          if (!isDragging) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          card.style.transform = `translateX(${dx}px) translateY(${dy}px) rotate(${dx * 0.07}deg)`;
+          card.querySelector('.card-like-label').style.opacity = Math.max(0, dx / 80);
+          card.querySelector('.card-nope-label').style.opacity = Math.max(0, -dx / 80);
+        });
+        document.addEventListener('mouseup', e => {
+          if (!isDragging) return;
+          isDragging = false;
+          card.classList.remove('dragging');
+          const dx = e.clientX - startX;
+          if (dx > 80) swipeCard('right');
+          else if (dx < -80) swipeCard('left');
+          else {
+            card.style.transform = 'translateY(0px) scale(1)';
+            card.querySelector('.card-like-label').style.opacity = 0;
+            card.querySelector('.card-nope-label').style.opacity = 0;
+          }
+        });
+      }
+
+      stack.appendChild(card);
+    });
+  }
+
+  async function swipeCard(dir) {
+    const topCard = stack.lastElementChild;
+    if (!topCard) return;
+    
+    const swipedId = cards[cardIndex].id;
+    
+    topCard.classList.add(dir === 'right' ? 'swipe-right' : 'swipe-left');
+    
+    // API Call
+    fetch('/match/swipe', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` 
+      },
+      body: JSON.stringify({ swipedId, direction: dir })
+    }).then(r => r.json()).then(res => {
+      if (res.match) {
+        alert("It's a Match! Look at your Messages.");
+        loadConvos(); // reload convos
+      }
+    }).catch(console.error);
+
+    setTimeout(() => {
+      cardIndex++;
+      buildCards();
+    }, 420);
+  }
+
+  // ── VIEW SWITCH ──
+  function switchView(view, btn) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(view + 'View').classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+
+  // ── CONVO LIST ──
+  function buildConvoList() {
+    const list = document.getElementById('convoList');
+    list.innerHTML = '';
+    convos.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'convo-item' + (c.conversation_id === activeConvo ? ' active' : '');
+      const matchHigh = c.match >= 80;
+      const matchClass = c.match >= 85 ? 'high' : c.match >= 70 ? 'mid' : '';
+      item.innerHTML = `
+        <div class="convo-avatar">${c.initial}</div>
+        <div class="convo-info">
+          <div class="convo-name">${c.alias}</div>
+          <div class="convo-preview">${c.preview}</div>
+        </div>
+        <div class="convo-meta">
+          <div class="convo-match-pct ${matchClass}">${c.match}%</div>
+          ${c.unread ? '<div class="convo-unread"></div>' : ''}
+        </div>
+      `;
+      item.addEventListener('click', () => openConvo(c.conversation_id));
+      list.appendChild(item);
+    });
+  }
+
+  let activeConvo = null;
+
+  function openConvo(id) {
+    activeConvo = id;
+    const convo = convos.find(c => c.conversation_id === id);
+    if (!convo) return;
+    convo.unread = false;
+    buildConvoList();
+
+    const main = document.getElementById('chatMain');
+    main.innerHTML = `
+      <div class="chat-topbar" id="chatTopbar">
+        <div class="chat-topbar-avatar">${convo.initial}</div>
+        <div class="chat-topbar-info">
+          <div class="chat-topbar-name">${convo.alias}</div>
+          <div class="chat-topbar-tags">
+            ${convo.allTags.map(t => `<span class="topbar-tag${convo.sharedTags.includes(t) ? ' shared' : ''}">${convo.sharedTags.includes(t) ? '✦ ' : ''}${t}</span>`).join('')}
+          </div>
+          <div class="topbar-shared-label"><span>${convo.sharedTags.length} shared</span> · ${convo.allTags.length - convo.sharedTags.length} unique to them</div>
+        </div>
+        <div class="anon-tag">ANONYMOUS</div>
+        <div class="topbar-match-block">
+          <div class="topbar-match-num">${convo.match}%</div>
+          <div class="topbar-match-label">match</div>
+        </div>
+      </div>
+      <div class="chat-messages" id="msgArea">
+        <div class="date-divider">Start of Chat</div>
+        ${convo.messages.map((m, i) => `
+          <div class="msg-row ${m.from}" style="animation-delay:${i * 0.08}s">
+            ${m.from === 'them' ? `<div class="msg-avatar-sm">${convo.initial}</div>` : ''}
+            <div>
+              <div class="msg-bubble">${m.text}</div>
+              <div class="msg-time">${m.time}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="chat-input-bar">
+        <input class="chat-input" id="msgInput" type="text" placeholder="Message anonymously…" autocomplete="off"/>
+        <button class="send-btn" onclick="sendMessage()">↑</button>
+      </div>
+    `;
+
+    const input = document.getElementById('msgInput');
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+    scrollToBottom();
+  }
+
+  function appendMessage(msg) {
+    const area = document.getElementById('msgArea');
+    if (!area) return;
+    const row = document.createElement('div');
+    row.className = `msg-row ${msg.from}`;
+    row.innerHTML = `
+      ${msg.from === 'them' ? `<div class="msg-avatar-sm">${msg.initial}</div>` : ''}
+      <div><div class="msg-bubble">${msg.text}</div><div class="msg-time">${msg.time}</div></div>
+    `;
+    area.appendChild(row);
+    scrollToBottom();
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text || !activeConvo) return;
+    
+    // Emit via socket
+    socket.emit('send_message', { conversation_id: activeConvo, content: text });
+
+    const convo = convos.find(c => c.conversation_id === activeConvo);
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    convo.messages.push({ from: 'me', text, time });
+    convo.preview = text.slice(0, 32) + (text.length > 32 ? '…' : '');
+    
+    input.value = '';
+    
+    appendMessage({ from: 'me', text, time });
+    buildConvoList();
+  }
+
+  function scrollToBottom() {
+    const area = document.getElementById('msgArea');
+    if (area) area.scrollTop = area.scrollHeight;
+  }
+
+  // Kick everything off
+  init();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+  // ── PAGE ENTRANCE ──
+  gsap.from('.topbar',       { y: -50, opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.1 });
+  gsap.from('.chat-sidebar', { x: -60, opacity: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 });
+  gsap.from('.app',          { opacity: 0, duration: 0.5, ease: 'power2.out', delay: 0.15 });
+
+  // ── TAB SWITCH animation ──
+  const origSwitchView = switchView;
+  window.switchView = function(view, btn) {
+    const current = document.querySelector('.view.active');
+    if (current) {
+      gsap.to(current, {
+        opacity: 0, x: -20, duration: 0.2, ease: 'power2.in',
+        onComplete: () => {
+          origSwitchView(view, btn);
+          const next = document.querySelector('.view.active');
+          gsap.fromTo(next,
+            { opacity: 0, x: 20 },
+            { opacity: 1, x: 0, duration: 0.35, ease: 'power3.out' }
+          );
+        }
+      });
+    } else {
+      origSwitchView(view, btn);
+    }
+  };
+
+  // ── CONVO ITEM hover ──
+  function animateConvoItems() {
+    gsap.from('.convo-item', {
+      x: -20, opacity: 0, duration: 0.4,
+      stagger: 0.07, ease: 'power3.out', delay: 0.3
+    });
+  }
+  setTimeout(animateConvoItems, 300);
+
+  // ── OPEN CONVO: slide in chat area ──
+  const origOpenConvo = openConvo;
+  window.openConvo = function(id) {
+    origOpenConvo(id);
+    const main = document.getElementById('chatMain');
+    gsap.from(main.querySelector('.chat-topbar'), {
+      y: -20, opacity: 0, duration: 0.4, ease: 'power3.out'
+    });
+    gsap.from(main.querySelector('.chat-topbar-match'), {
+      x: 20, opacity: 0, duration: 0.5, ease: 'back.out(1.7)', delay: 0.25
+    });
+    gsap.from(main.querySelectorAll('.msg-row'), {
+      y: 16, opacity: 0, duration: 0.35,
+      stagger: 0.07, ease: 'power3.out', delay: 0.1
+    });
+    gsap.from(main.querySelector('.chat-input-bar'), {
+      y: 20, opacity: 0, duration: 0.4, ease: 'power3.out', delay: 0.2
+    });
+  };
+
+  // ── NEW MESSAGE animation (patch sendMessage) ──
+  const origSendMessage = sendMessage;
+  window.sendMessage = function(id) {
+    origSendMessage(id);
+    // animate the newly added sent message
+    const area = document.getElementById('msgArea');
+    if (!area) return;
+    const rows = area.querySelectorAll('.msg-row.me');
+    const lastRow = rows[rows.length - 1];
+    if (lastRow) {
+      gsap.from(lastRow, {
+        x: 30, opacity: 0, duration: 0.35, ease: 'power3.out'
+      });
+    }
+  };
+
+  // ── CARD SWIPE animations ──
+  const origSwipeCard = swipeCard;
+  window.swipeCard = function(dir) {
+    const topCard = document.querySelector('#cardStack').lastElementChild;
+    if (topCard) {
+      gsap.to(topCard, {
+        x: dir === 'right' ? 400 : -400,
+        rotation: dir === 'right' ? 15 : -15,
+        opacity: 0, duration: 0.4, ease: 'power2.in',
+        onComplete: () => origSwipeCard(dir)
+      });
+    } else {
+      origSwipeCard(dir);
+    }
+  };
+
+  // ── MATCH CARD entrance ──
+  const origBuildCards = buildCards;
+  window.buildCards = function() {
+    origBuildCards();
+    const cards = document.querySelectorAll('.match-card');
+    gsap.from(cards[cards.length - 1], {
+      scale: 0.88, opacity: 0, duration: 0.5,
+      ease: 'back.out(1.4)'
+    });
+  };
+
+  // ── ACTION BUTTONS hover ──
+  document.querySelectorAll('.action-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', () => {
+      gsap.to(btn, { scale: 1.15, duration: 0.2, ease: 'power2.out' });
+    });
+    btn.addEventListener('mouseleave', () => {
+      gsap.to(btn, { scale: 1, duration: 0.3, ease: 'elastic.out(1, 0.4)' });
+    });
+    btn.addEventListener('click', () => {
+      gsap.timeline()
+        .to(btn, { scale: 0.85, duration: 0.1 })
+        .to(btn, { scale: 1.1,  duration: 0.2, ease: 'back.out(2)' })
+        .to(btn, { scale: 1,    duration: 0.2 });
+    });
+  });
+
+  // ── SEND BUTTON pulse ──
+  document.addEventListener('click', e => {
+    const sendBtn = e.target.closest('.send-btn');
+    if (!sendBtn) return;
+    gsap.timeline()
+      .to(sendBtn, { scale: 0.85, duration: 0.1 })
+      .to(sendBtn, { scale: 1, duration: 0.3, ease: 'elastic.out(1.2, 0.4)' });
+  });
+
+  // ── TOPBAR ALIAS shimmer on load ──
+  gsap.from('.topbar-alias', {
+    opacity: 0, duration: 1, delay: 0.6, ease: 'power2.out'
+  });
+  gsap.from('.topbar-tabs', {
+    y: -10, opacity: 0, duration: 0.5, delay: 0.4, ease: 'power3.out'
+  });
+</script>
+</body>
+</html>

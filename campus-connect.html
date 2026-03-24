@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindred – Find Your People</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #f5f0e8;
+    --accent: #c8432a;
+    --muted: #7a6e60;
+    --card: #ede8dc;
+    --green: #2a6b4c;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    top: 0; left: 0;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    top: 0; left: 0;
+    transform: translate(-50%, -50%);
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 2.5rem;
+    z-index: 100;
+    background: rgba(245,240,232,0.6);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(122,110,96,0.12);
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); font-style: italic; }
+  nav ul { list-style: none; display: flex; gap: 0.5rem; align-items: center; }
+  nav ul li a {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    padding: 0.45rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(122,110,96,0.25);
+    background: rgba(245,240,232,0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(90,70,50,0.08), inset 0 1px 0 rgba(245,240,232,0.7);
+    transition: background 0.2s, box-shadow 0.2s;
+    display: inline-block;
+  }
+  nav ul li a:hover {
+    background: rgba(245,240,232,0.6);
+    box-shadow: 0 4px 16px rgba(90,70,50,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  nav ul li:last-child a {
+    background: rgba(13,13,13,0.82);
+    border-color: rgba(13,13,13,0.4);
+    color: var(--paper);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(245,240,232,0.08);
+  }
+  nav ul li:last-child a:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-left {
+    padding: 10rem 3rem 4rem 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+  .eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 5vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 400px;
+    margin-bottom: 3rem;
+  }
+  .cta-row {
+    display: flex; gap: 1rem; align-items: center;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.9rem 2.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border: none;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .btn-primary:hover::after { transform: translateX(0); }
+  .btn-primary span { position: relative; z-index: 1; }
+  .btn-secondary {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 0.5rem;
+    transition: color 0.2s;
+  }
+  .btn-secondary:hover { color: var(--ink); }
+  .btn-secondary::before { content: '→'; font-size: 1rem; }
+
+  .hero-right {
+    position: relative;
+    background: var(--ink);
+    overflow: hidden;
+  }
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .hero-right-overlay {
+    position: absolute;
+    bottom: 2.5rem; left: 2.5rem;
+    z-index: 2;
+  }
+  .match-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(245,240,232,0.07);
+    border: 1px solid rgba(245,240,232,0.12);
+    backdrop-filter: blur(8px);
+    padding: 0.6rem 1.1rem;
+    margin: 0.3rem 0.2rem;
+    font-size: 0.75rem;
+    color: rgba(245,240,232,0.6);
+    letter-spacing: 0.06em;
+    opacity: 0;
+    animation: pillIn 0.5s forwards;
+  }
+  .match-pill .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .match-pill .dot.green { background: var(--green); }
+  @keyframes pillIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    background: var(--ink);
+    padding: 1rem 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .marquee-track {
+    display: inline-flex;
+    animation: marquee 25s linear infinite;
+  }
+  .marquee-item {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--paper);
+    opacity: 0.4;
+    margin: 0 2rem;
+    font-style: italic;
+  }
+  .marquee-item.accent { color: var(--accent); opacity: 1; }
+
+  /* HOW IT WORKS */
+  .section { padding: 7rem 5rem; }
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 3.5vw, 3.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    max-width: 500px;
+    margin-bottom: 4rem;
+  }
+  .section-title em { font-style: italic; color: var(--accent); }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+  }
+  .step {
+    background: var(--card);
+    padding: 3rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .step:hover { background: var(--ink); color: var(--paper); }
+  .step:hover .step-num { color: var(--accent); }
+  .step:hover .step-desc { color: rgba(245,240,232,0.6); }
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-style: italic;
+    color: rgba(0,0,0,0.08);
+    line-height: 1;
+    margin-bottom: 1rem;
+    transition: color 0.3s;
+  }
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 0.8rem;
+  }
+  .step-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+    transition: color 0.3s;
+  }
+
+  /* INTEREST CARDS */
+  .tags-section {
+    background: var(--ink);
+    padding: 7rem 5rem;
+    color: var(--paper);
+  }
+  .tags-section .section-label { color: var(--accent); }
+  .tags-section .section-title { color: var(--paper); }
+
+  .interest-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 1rem;
+  }
+  .interest-card {
+    background: #161616;
+    padding: 2rem 1.8rem;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.25s;
+    border: 1.5px solid transparent;
+  }
+  .interest-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--card-color, var(--accent));
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .interest-card:hover::before,
+  .interest-card.selected::before { opacity: 1; }
+  .interest-card.selected { border-color: var(--card-color, var(--accent)); }
+
+  .ic-emoji {
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+    display: block;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.2s;
+  }
+  .interest-card:hover .ic-emoji { transform: scale(1.2) rotate(-5deg); }
+  .ic-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    color: var(--paper);
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0.3rem;
+  }
+  .ic-count {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.35);
+    position: relative;
+    z-index: 1;
+    transition: color 0.2s;
+  }
+  .interest-card:hover .ic-count,
+  .interest-card.selected .ic-count { color: rgba(245,240,232,0.7); }
+  .ic-check {
+    position: absolute;
+    top: 1.2rem; right: 1.2rem;
+    width: 22px; height: 22px;
+    border: 1.5px solid rgba(245,240,232,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem;
+    color: transparent;
+    z-index: 1;
+    transition: all 0.2s;
+  }
+  .interest-card.selected .ic-check {
+    background: rgba(0,0,0,0.3);
+    border-color: white;
+    color: white;
+  }
+  .tags-cta {
+    margin-top: 2.5rem;
+    display: flex; align-items: center; gap: 1.5rem;
+  }
+  .tags-cta-btn {
+    background: var(--accent);
+    color: var(--paper);
+    padding: 0.85rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    border: none;
+    cursor: none;
+    text-transform: uppercase;
+  }
+  .tags-selected-count {
+    font-size: 0.8rem;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 0.05em;
+  }
+  .tags-selected-count span { color: var(--accent); font-weight: 600; }
+
+  /* CHAT PREVIEW */
+  .chat-section {
+    padding: 7rem 5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+  .chat-window {
+    background: var(--card);
+    border-top: 3px solid var(--ink);
+    padding: 0;
+    overflow: hidden;
+  }
+  .chat-header {
+    background: var(--ink);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .chat-avatar {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    color: white;
+    font-weight: 600;
+  }
+  .chat-name {
+    font-size: 0.85rem;
+    color: var(--paper);
+    font-weight: 500;
+  }
+  .chat-status {
+    font-size: 0.7rem;
+    color: rgba(245,240,232,0.4);
+  }
+  .anon-badge {
+    margin-left: auto;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 0.2rem 0.6rem;
+  }
+  .chat-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .msg {
+    max-width: 80%;
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .msg.them {
+    background: white;
+    align-self: flex-start;
+    border-radius: 0 12px 12px 12px;
+  }
+  .msg.me {
+    background: var(--ink);
+    color: var(--paper);
+    align-self: flex-end;
+    border-radius: 12px 12px 0 12px;
+  }
+  .msg.them2 {
+    background: white;
+    align-self: flex-start;
+    border-radius: 0 12px 12px 12px;
+  }
+  .chat-input-row {
+    border-top: 1px solid rgba(0,0,0,0.08);
+    padding: 1rem 1.5rem;
+    display: flex; gap: 0.8rem; align-items: center;
+  }
+  .chat-input {
+    flex: 1;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.1);
+    padding: 0.7rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink);
+    outline: none;
+  }
+  .send-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    font-size: 1rem;
+    cursor: none;
+  }
+
+  .chat-text .section-title { max-width: 400px; }
+  .chat-feature {
+    display: flex; gap: 1rem; align-items: flex-start;
+    margin-top: 1.5rem;
+  }
+  .cf-icon {
+    width: 36px; height: 36px;
+    background: var(--card);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .cf-title { font-weight: 500; margin-bottom: 0.3rem; font-size: 0.95rem; }
+  .cf-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 4rem 5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-style: italic;
+    opacity: 0.15;
+  }
+  .footer-tagline {
+    font-size: 0.8rem;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* MARQUEE */
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .steps { grid-template-columns: 1fr; }
+    .chat-section { grid-template-columns: 1fr; gap: 3rem; }
+    .section, .tags-section { padding: 5rem 2rem; }
+    .interest-grid { grid-template-columns: repeat(2, 1fr); }
+    nav { padding: 1rem 2rem; }
+    nav ul { display: none; }
+    footer { flex-direction: column; gap: 1rem; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a class="logo" href="campus-connect.html">Kind<span>red</span></a>
+  <ul>
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#interests">Interests</a></li>
+    <li><a href="#chat-preview">About</a></li>
+    <li><a href="kindred-signup.html">Join</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="eyebrow">Your College · Anonymous · Authentic</p>
+    <h1>Find your <em>people,</em><br>not your profile.</h1>
+    <p class="hero-sub">Connect with students who share your interests and ideas — anonymously. No followers, no clout, just genuine conversations.</p>
+    <div class="cta-row">
+      <a href="kindred-signup.html" class="btn-primary"><span>Get Early Access</span></a>
+      <a href="#how-it-works" class="btn-secondary">See how it works</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <canvas class="hero-canvas" id="heroCanvas"></canvas>
+    <div class="hero-right-overlay" id="matchPills"></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marqueeTrack"></div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how-it-works">
+  <p class="section-label">The Process</p>
+  <h2 class="section-title">Simple, <em>private,</em> and oddly satisfying.</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Pick Your Interests</div>
+      <p class="step-desc">Choose from a curated set of topics — philosophy, open-source, poetry, climate, cinema, startups, and dozens more.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Get Matched</div>
+      <p class="step-desc">Our algorithm surfaces students whose interest overlap with yours. No algorithms selling your attention — just relevance.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Chat Anonymously</div>
+      <p class="step-desc">Start a conversation under a randomly assigned alias. Reveal yourself only when — and if — you feel like it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- INTERESTS -->
+<section class="tags-section" id="interests">
+  <p class="section-label">Pick Your World</p>
+  <h2 class="section-title">What are <em>you</em> into?</h2>
+  <div class="interest-grid" id="interestGrid"></div>
+  <div class="tags-cta">
+    <button class="tags-cta-btn" onclick="window.location.href='kindred-signup.html'">Find My People →</button>
+    <p class="tags-selected-count"><span id="selCount">0</span> interests selected</p>
+  </div>
+</section>
+
+<!-- CHAT PREVIEW -->
+<section class="chat-section" id="chat-preview">
+  <div class="chat-window">
+    <div class="chat-header">
+      <div class="chat-avatar">?</div>
+      <div>
+        <div class="chat-name">Phantom #4821</div>
+        <div class="chat-status">Interested in: Philosophy · Open Source</div>
+      </div>
+      <div class="anon-badge">Anonymous</div>
+    </div>
+    <div class="chat-body">
+      <div class="msg them">"Do you think determinism makes moral responsibility incoherent, or is compatibilism actually convincing?"</div>
+      <div class="msg me">"Compatibilism feels like a cope to me — but I keep getting drawn back to Frankfurt's argument."</div>
+      <div class="msg them2">"Right! The hierarchical desires thing is interesting. Have you read Wolf's 'Sanity and the Metaphysics of Responsibility'?"</div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" type="text" placeholder="Reply anonymously…" readonly />
+      <button class="send-btn">↑</button>
+    </div>
+  </div>
+
+  <div class="chat-text">
+    <p class="section-label">Anonymous Chat</p>
+    <h2 class="section-title">Talk freely. <em>No baggage.</em></h2>
+    <div class="chat-feature">
+      <div class="cf-icon">🎭</div>
+      <div>
+        <div class="cf-title">Random Aliases</div>
+        <p class="cf-desc">Everyone gets a Phantom name. Share your real identity only when you choose to.</p>
+      </div>
+    </div>
+    <div class="chat-feature">
+      <div class="cf-icon">🔒</div>
+      <div>
+        <div class="cf-title">College-gated</div>
+        <p class="cf-desc">Verified via your college email. Only your campus community, no outsiders.</p>
+      </div>
+    </div>
+    <div class="chat-feature">
+      <div class="cf-icon">🧭</div>
+      <div>
+        <div class="cf-title">Interest-matched</div>
+        <p class="cf-desc">You'll only see people whose interests overlap meaningfully with yours — no noise.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <p class="footer-tagline">Built for curious minds ·  Your College</p>
+  </div>
+  <div class="footer-logo">Kindred</div>
+</footer>
+
+<script>
+
+  // Hero Canvas — floating nodes with connection lines
+  const canvas = document.getElementById('heroCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const TOPICS = ['Philosophy','Startups','Cinema','Poetry','Climate','Open Source','Jazz','AI & ML','Literature','Debate','Astronomy','Chess','Theatre','Robotics','Feminism'];
+  const COLORS = ['#c8432a','#2a6b4c','#5a3fa0','#1a6fa8','#b07d2a'];
+
+  let nodes = [];
+  let W, H;
+
+  function resize() {
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', () => { resize(); initNodes(); });
+
+  function initNodes() {
+    nodes = TOPICS.map((label, i) => ({
+      x: W * 0.1 + Math.random() * W * 0.8,
+      y: H * 0.1 + Math.random() * H * 0.8,
+      vx: (Math.random() - 0.5) * 0.45,
+      vy: (Math.random() - 0.5) * 0.45,
+      r: 28 + Math.random() * 18,
+      label,
+      color: COLORS[i % COLORS.length],
+      alpha: 0.55 + Math.random() * 0.35,
+      pulse: Math.random() * Math.PI * 2,
+    }));
+  }
+  initNodes();
+
+  function drawNode(n) {
+    const pr = n.r + Math.sin(n.pulse) * 4;
+    // glow
+    const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, pr * 2.2);
+    grd.addColorStop(0, n.color + '55');
+    grd.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, pr * 2.2, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+
+    // circle
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, pr, 0, Math.PI * 2);
+    ctx.fillStyle = '#161616';
+    ctx.fill();
+    ctx.strokeStyle = n.color;
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = n.alpha;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // label
+    ctx.font = `500 ${Math.max(9, pr * 0.38)}px DM Sans, sans-serif`;
+    ctx.fillStyle = 'rgba(245,240,232,0.85)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(n.label, n.x, n.y);
+  }
+
+  function getConnections() {
+    const pairs = [];
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 160) pairs.push({ a: nodes[i], b: nodes[j], dist });
+      }
+    }
+    return pairs;
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+
+    // connections
+    const conns = getConnections();
+    conns.forEach(({ a, b, dist }) => {
+      const alpha = (1 - dist / 160) * 0.35;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.strokeStyle = `rgba(245,240,232,${alpha})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    nodes.forEach(n => {
+      n.x += n.vx;
+      n.y += n.vy;
+      n.pulse += 0.025;
+      if (n.x < n.r || n.x > W - n.r) n.vx *= -1;
+      if (n.y < n.r || n.y > H - n.r) n.vy *= -1;
+      drawNode(n);
+    });
+
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  // Animated match pills
+  const pillData = [
+    { label: 'Phantom #2341 · Philosophy', green: false },
+    { label: 'Phantom #8812 · Open Source', green: true },
+    { label: 'Phantom #5503 · Cinema', green: false },
+    { label: 'Phantom #1190 · Startups', green: true },
+    { label: 'Phantom #6672 · Jazz', green: false },
+  ];
+  const pillsContainer = document.getElementById('matchPills');
+  let pillIdx = 0;
+  function spawnPill() {
+    const p = pillData[pillIdx % pillData.length];
+    pillIdx++;
+    const el = document.createElement('div');
+    el.className = 'match-pill';
+    el.style.animationDelay = '0s';
+    el.innerHTML = `<span class="dot${p.green ? ' green' : ''}"></span>${p.label}`;
+    pillsContainer.appendChild(el);
+    if (pillsContainer.children.length > 3) pillsContainer.removeChild(pillsContainer.firstChild);
+    setTimeout(spawnPill, 2200);
+  }
+  setTimeout(spawnPill, 800);
+
+  // Marquee
+  const marqueeTopics = ['Philosophy · ', 'Open Source · ', 'Midnight Thoughts · ', 'Climate Action · ', 'Jazz & Blues · ', 'Indie Cinema · ', 'Startups · ', 'Literature · ', 'Competitive Coding · ', 'Political Theory · ', 'Mathematics · ', 'Street Photography · '];
+  const track = document.getElementById('marqueeTrack');
+  const doubled = [...marqueeTopics, ...marqueeTopics];
+  doubled.forEach((t, i) => {
+    const span = document.createElement('span');
+    span.className = 'marquee-item' + (i % 4 === 1 ? ' accent' : '');
+    span.textContent = t;
+    track.appendChild(span);
+  });
+
+  // Interest Cards
+  const interests = [
+    { emoji: '🧠', name: 'Philosophy', count: '142 students', color: '#c8432a' },
+    { emoji: '💻', name: 'Open Source', count: '98 students', color: '#2a6b4c' },
+    { emoji: '🎬', name: 'Indie Cinema', count: '76 students', color: '#5a3fa0' },
+    { emoji: '🌿', name: 'Climate', count: '115 students', color: '#2a6b4c' },
+    { emoji: '🎷', name: 'Jazz & Music', count: '63 students', color: '#b07d2a' },
+    { emoji: '✍️', name: 'Poetry', count: '89 students', color: '#c8432a' },
+    { emoji: '🚀', name: 'Startups', count: '201 students', color: '#1a6fa8' },
+    { emoji: '🤖', name: 'AI & ML', count: '187 students', color: '#5a3fa0' },
+    { emoji: '📖', name: 'Literature', count: '134 students', color: '#b07d2a' },
+    { emoji: '⚖️', name: 'Political Theory', count: '77 students', color: '#c8432a' },
+    { emoji: '🌌', name: 'Astronomy', count: '55 students', color: '#1a6fa8' },
+    { emoji: '♟️', name: 'Chess', count: '92 students', color: '#2a6b4c' },
+  ];
+  const igrid = document.getElementById('interestGrid');
+  const selCount = document.getElementById('selCount');
+  let selected = 0;
+  interests.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'interest-card';
+    card.style.setProperty('--card-color', item.color);
+    card.innerHTML = `
+      <span class="ic-emoji">${item.emoji}</span>
+      <div class="ic-name">${item.name}</div>
+      <div class="ic-count">${item.count}</div>
+      <div class="ic-check">✓</div>
+    `;
+    card.addEventListener('click', () => {
+      card.classList.toggle('selected');
+      selected = document.querySelectorAll('.interest-card.selected').length;
+      selCount.textContent = selected;
+    });
+    igrid.appendChild(card);
+  });
+</script>
+
+<!-- GSAP ANIMATIONS -->
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  // ── NAV: slide down on load ──
+  gsap.from('nav', {
+    y: -80, opacity: 0, duration: 1,
+    ease: 'power4.out', delay: 0.1
+  });
+
+  // ── HERO: cinematic entrance ──
+  const heroTl = gsap.timeline({ delay: 0.4 });
+  heroTl
+    .from('.eyebrow',  { y: 30, opacity: 0, duration: 0.7, ease: 'power3.out' })
+    .from('h1',        { y: 60, opacity: 0, duration: 1.1, ease: 'power4.out' }, '-=0.3')
+    .from('.hero-sub', { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=0.6')
+    .from('.cta-row',  { y: 20, opacity: 0, duration: 0.7, ease: 'power3.out' }, '-=0.5');
+
+  // ── HERO: h1 shimmer after entrance ──
+  heroTl.to('h1 em', {
+    color: '#e85a3a', duration: 0.3,
+    yoyo: true, repeat: 1, ease: 'power2.inOut'
+  }, '+=0.1');
+
+  // ── CTA BUTTON: magnetic hover ──
+  const btnPrimary = document.querySelector('.btn-primary');
+  if (btnPrimary) {
+    btnPrimary.addEventListener('mousemove', e => {
+      const r = btnPrimary.getBoundingClientRect();
+      gsap.to(btnPrimary, {
+        x: (e.clientX - r.left - r.width  / 2) * 0.3,
+        y: (e.clientY - r.top  - r.height / 2) * 0.3,
+        duration: 0.4, ease: 'power2.out'
+      });
+    });
+    btnPrimary.addEventListener('mouseleave', () => {
+      gsap.to(btnPrimary, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
+    });
+  }
+
+  // ── CUSTOM CURSOR ──
+  const cursorDot  = document.getElementById('cursor');
+  const cursorRing = document.getElementById('cursorRing');
+  window.addEventListener('mousemove', e => {
+    gsap.to(cursorDot,  { x: e.clientX, y: e.clientY, duration: 0.08, ease: 'none' });
+    gsap.to(cursorRing, { x: e.clientX, y: e.clientY, duration: 0.3,  ease: 'power2.out' });
+  });
+  document.querySelectorAll('a, button, .interest-card, .step, .action-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      gsap.to(cursorRing, { scale: 2, opacity: 0.5, duration: 0.3, ease: 'power2.out' });
+      gsap.to(cursorDot,  { scale: 0.4, duration: 0.3 });
+    });
+    el.addEventListener('mouseleave', () => {
+      gsap.to(cursorRing, { scale: 1, opacity: 1, duration: 0.4, ease: 'elastic.out(1,0.5)' });
+      gsap.to(cursorDot,  { scale: 1, duration: 0.3 });
+    });
+  });
+
+  // ── MARQUEE section: fade in ──
+  gsap.from('.marquee-wrap', {
+    scrollTrigger: { trigger: '.marquee-wrap', start: 'top 90%' },
+    opacity: 0, duration: 0.8, ease: 'power2.out'
+  });
+
+  // ── HOW IT WORKS section ──
+  gsap.from('.section .section-label', {
+    scrollTrigger: { trigger: '.section', start: 'top 78%' },
+    y: 20, opacity: 0, duration: 0.6, ease: 'power3.out'
+  });
+  gsap.from('.section .section-title', {
+    scrollTrigger: { trigger: '.section', start: 'top 75%' },
+    y: 40, opacity: 0, duration: 0.8, ease: 'power3.out', delay: 0.1
+  });
+  gsap.from('.step', {
+    scrollTrigger: { trigger: '.steps', start: 'top 78%' },
+    y: 70, opacity: 0, duration: 0.8,
+    stagger: 0.18, ease: 'power3.out'
+  });
+
+  // ── STEP CARDS: 3D tilt on hover ──
+  document.querySelectorAll('.step').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - 0.5;
+      const y = (e.clientY - r.top)  / r.height - 0.5;
+      gsap.to(card, {
+        rotateY: x * 10, rotateX: -y * 10,
+        transformPerspective: 700,
+        duration: 0.4, ease: 'power2.out'
+      });
+    });
+    card.addEventListener('mouseleave', () => {
+      gsap.to(card, { rotateY: 0, rotateX: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)' });
+    });
+  });
+
+  // ── TAGS SECTION: heading reveal ──
+  gsap.from('.tags-section .section-label', {
+    scrollTrigger: { trigger: '.tags-section', start: 'top 80%' },
+    y: 24, opacity: 0, duration: 0.6, ease: 'power3.out'
+  });
+  gsap.from('.tags-section .section-title', {
+    scrollTrigger: { trigger: '.tags-section', start: 'top 77%' },
+    y: 40, opacity: 0, duration: 0.8, ease: 'power3.out', delay: 0.1
+  });
+
+  // ── INTEREST CARDS: staggered reveal from bottom ──
+  gsap.set('.interest-card', { y: 40, opacity: 0 });
+  ScrollTrigger.create({
+    trigger: '#interestGrid',
+    start: 'top 80%',
+    onEnter: () => {
+      gsap.to('.interest-card', {
+        y: 0, opacity: 1, duration: 0.6,
+        stagger: { amount: 0.7, from: 'start' },
+        ease: 'power3.out'
+      });
+    }
+  });
+
+  // ── INTEREST CARDS: click pop ──
+  document.addEventListener('click', e => {
+    const card = e.target.closest('.interest-card');
+    if (!card) return;
+    gsap.timeline()
+      .to(card, { scale: 0.92, duration: 0.1, ease: 'power2.in' })
+      .to(card, { scale: 1.03, duration: 0.25, ease: 'power2.out' })
+      .to(card, { scale: 1,    duration: 0.4,  ease: 'elastic.out(1.2, 0.4)' });
+    // emoji bounce
+    const emoji = card.querySelector('.ic-emoji');
+    if (emoji) gsap.fromTo(emoji,
+      { y: 0 },
+      { y: -10, duration: 0.2, yoyo: true, repeat: 1, ease: 'power2.out' }
+    );
+  });
+
+  // ── TAGS CTA BUTTON ──
+  const tagsCta = document.querySelector('.tags-cta-btn');
+  if (tagsCta) {
+    gsap.from(tagsCta, {
+      scrollTrigger: { trigger: '.tags-cta', start: 'top 85%' },
+      y: 20, opacity: 0, duration: 0.6, ease: 'power3.out'
+    });
+  }
+
+  // ── CHAT SECTION: slide in from sides ──
+  gsap.from('.chat-window', {
+    scrollTrigger: { trigger: '.chat-section', start: 'top 75%' },
+    x: -80, opacity: 0, duration: 1, ease: 'power3.out'
+  });
+  gsap.from('.chat-text', {
+    scrollTrigger: { trigger: '.chat-section', start: 'top 75%' },
+    x: 80, opacity: 0, duration: 1, ease: 'power3.out', delay: 0.15
+  });
+  gsap.from('.chat-feature', {
+    scrollTrigger: { trigger: '.chat-section', start: 'top 70%' },
+    y: 30, opacity: 0, duration: 0.6,
+    stagger: 0.2, ease: 'power3.out', delay: 0.35
+  });
+
+  // ── CHAT MESSAGES: animate when chat section visible ──
+  ScrollTrigger.create({
+    trigger: '.chat-window',
+    start: 'top 75%',
+    onEnter: () => {
+      gsap.to('.msg', {
+        opacity: 1, y: 0, duration: 0.5,
+        stagger: 0.4, ease: 'power3.out',
+        delay: 0.6
+      });
+      gsap.set('.msg', { y: 12 });
+    }
+  });
+
+  // ── FOOTER ──
+  gsap.from('footer > *', {
+    scrollTrigger: { trigger: 'footer', start: 'top 90%' },
+    y: 30, opacity: 0, duration: 0.8,
+    stagger: 0.2, ease: 'power3.out'
+  });
+
+  // ── SCROLL PROGRESS indicator (thin accent line at top) ──
+  const progressBar = document.createElement('div');
+  progressBar.style.cssText = `
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: var(--accent); z-index: 9999;
+    width: 0%; pointer-events: none;
+    transform-origin: left;
+  `;
+  document.body.appendChild(progressBar);
+  window.addEventListener('scroll', () => {
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    gsap.to(progressBar, { width: pct + '%', duration: 0.1, ease: 'none' });
+  });
+</script>
+</body>
+</html>

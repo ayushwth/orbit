@@ -1,0 +1,65 @@
+﻿[dotenv@17.3.1] injecting env (3) from .env -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+========================================
+  KINDRED DATABASE ΓÇö FULL DATA DUMP
+========================================
+
+=== USERS (9) ===
+  [22] testuser2 | Phantom #9610 | bio: "Just testing out the site!" | ideology: Rationalist | vibe: Deep thinker | joined: Tue Mar 10 2026 03:06:07 GMT+0530 (India Standard Time)
+  [23] mock1 | Phantom #1111 | bio: "I think free will is a myth. Let us debate." | ideology: Stoic | vibe: Overthinker | joined: Tue Mar 10 2026 19:10:14 GMT+0530 (India Standard Time)
+  [24] mock2 | Phantom #2222 | bio: "Building open source tools for a better future." | ideology: Pragmatist | vibe: Builder | joined: Tue Mar 10 2026 19:10:14 GMT+0530 (India Standard Time)
+  [25] mock3 | Phantom #3333 | bio: "competitive chess player and philosopher." | ideology: Rationalist | vibe: Quiet rebel | joined: Tue Mar 10 2026 19:10:14 GMT+0530 (India Standard Time)
+  [26] ayush | Phantom #4541 | bio: "I love testing web apps and finding bugs. Stoic pragmatist." | ideology: Stoic | vibe: Deep thinker | joined: Tue Mar 10 2026 19:18:23 GMT+0530 (India Standard Time)
+  [30] testuser1 | Phantom #8613 | bio: "I love debating ideas" | ideology: Rationalist | vibe: Curious | joined: Tue Mar 10 2026 19:53:27 GMT+0530 (India Standard Time)
+  [34] hello | Phantom #6740 | bio: "heyyy there" | ideology: Rationalist | vibe: Night owl | joined: Tue Mar 10 2026 23:35:06 GMT+0530 (India Standard Time)
+  [35] yhbgh | Phantom #1268 | bio: "xdcfvgbhnm,." | ideology: Idealist | vibe: Night owl | joined: Tue Mar 10 2026 23:45:55 GMT+0530 (India Standard Time)
+  [36] testcheck | Phantom #1631 | bio: "Backend test user" | ideology: Tester | vibe: Chill | joined: Tue Mar 24 2026 17:12:23 GMT+0530 (India Standard Time)
+
+=== INTERESTS (15) ===
+  [1] Philosophy
+  [2] Chess
+  [3] AI & ML
+  [4] Literature
+  [5] Open Source
+  [6] Climate
+  [7] Stoicism
+  [8] Debate
+  [9] Psychology
+  [10] Economics
+  [11] Film
+  [12] Mathematics
+  [13] History
+  [14] Music Theory
+  [15] Startups
+
+=== USER INTERESTS (24 entries) ===
+  testuser2: [Philosophy, Startups, AI & ML]
+  mock1: [Philosophy, Open Source, Debate]
+  mock2: [Chess, Literature, Stoicism]
+  mock3: [Philosophy, Mathematics, Economics]
+  ayush: [Philosophy, AI & ML]
+  testuser1: [Philosophy, AI & ML, Chess]
+  hello: [Philosophy, Startups, AI & ML]
+  yhbgh: [Startups, AI & ML]
+  testcheck: [Philosophy, Chess]
+
+=== SWIPES (6) ===
+  [1] hello ΓåÆ mock3: ≡ƒæë RIGHT (like) | Tue Mar 10 2026 23:35:11 GMT+0530 (India Standard Time)
+  [2] hello ΓåÆ testuser1: ≡ƒæê LEFT (pass) | Tue Mar 10 2026 23:35:13 GMT+0530 (India Standard Time)
+  [3] hello ΓåÆ ayush: ≡ƒæë RIGHT (like) | Tue Mar 10 2026 23:35:15 GMT+0530 (India Standard Time)
+  [4] yhbgh ΓåÆ mock3: ≡ƒæë RIGHT (like) | Tue Mar 10 2026 23:46:01 GMT+0530 (India Standard Time)
+  [5] yhbgh ΓåÆ hello: ≡ƒæê LEFT (pass) | Tue Mar 10 2026 23:46:03 GMT+0530 (India Standard Time)
+  [6] yhbgh ΓåÆ testuser1: ≡ƒæë RIGHT (like) | Tue Mar 10 2026 23:46:03 GMT+0530 (India Standard Time)
+
+=== MATCHES (0) ===
+  (no matches yet)
+
+=== CONVERSATIONS (0) ===
+  (no conversations yet)
+
+=== MESSAGES (0) ===
+  (no messages yet)
+
+========================================
+  END OF DUMP
+========================================

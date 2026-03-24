@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindred — Join</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #f5f0e8;
+    --card: #ede8dc;
+    --accent: #c8432a;
+    --green: #2a6b4c;
+    --gold: #b8912a;
+    --muted: #7a6e60;
+    --border: rgba(13,13,13,0.1);
+    --serif: 'Playfair Display', serif;
+    --sans: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    width: 420px;
+    flex-shrink: 0;
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .left-panel::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(200,67,42,0.12) 0%, transparent 70%);
+    bottom: -100px; right: -100px;
+    pointer-events: none;
+  }
+  .left-panel::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(42,107,76,0.08) 0%, transparent 70%);
+    top: -50px; left: -50px;
+    pointer-events: none;
+  }
+  .lp-logo {
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    color: var(--paper);
+    letter-spacing: -0.02em;
+    position: relative; z-index: 1;
+  }
+  .lp-logo em { font-style: italic; color: var(--accent); }
+
+  .lp-mid { position: relative; z-index: 1; }
+  .lp-step-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .lp-title {
+    font-family: var(--serif);
+    font-size: 2.4rem;
+    line-height: 1.1;
+    color: var(--paper);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+  .lp-title em { font-style: italic; color: var(--accent); }
+  .lp-desc {
+    font-size: 0.88rem;
+    color: rgba(245,240,232,0.45);
+    line-height: 1.7;
+    max-width: 280px;
+  }
+
+  /* step dots */
+  .lp-steps { position: relative; z-index: 1; }
+  .step-dots {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+  .step-dot {
+    height: 3px;
+    border-radius: 99px;
+    background: rgba(245,240,232,0.15);
+    flex: 1;
+    transition: background 0.4s;
+  }
+  .step-dot.done { background: var(--green); }
+  .step-dot.active { background: var(--accent); }
+
+  .step-counter {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: rgba(245,240,232,0.3);
+  }
+  .step-counter span { color: var(--paper); }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  /* grain overlay */
+  .right-panel::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .form-container {
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── VIEWS ── */
+  .step-view { display: none; }
+  .step-view.active {
+    display: block;
+    animation: stepIn 0.45s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .form-title {
+    font-family: var(--serif);
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+  }
+  .form-title em { font-style: italic; color: var(--accent); }
+  .form-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+  }
+
+  .field { margin-bottom: 1.4rem; }
+  .field label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid var(--border);
+    padding: 0.7rem 0;
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: rgba(13,13,13,0.25); }
+  .field input:focus, .field textarea:focus { border-bottom-color: var(--accent); }
+  .field textarea { min-height: 90px; line-height: 1.6; }
+
+  .field-hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    letter-spacing: 0.02em;
+  }
+
+  /* char counter */
+  .char-counter {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 0.3rem;
+    transition: color 0.2s;
+  }
+  .char-counter.warn { color: var(--accent); }
+
+  /* password strength */
+  .pw-strength {
+    display: flex;
+    gap: 4px;
+    margin-top: 0.5rem;
+  }
+  .pw-bar {
+    height: 3px;
+    flex: 1;
+    border-radius: 99px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .pw-label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── INTEREST GRID ── */
+  .interest-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .i-card {
+    background: var(--card);
+    border: 1.5px solid transparent;
+    padding: 0.9rem 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  .i-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--card-color, var(--accent));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .i-card:hover::before { opacity: 0.08; }
+  .i-card.selected {
+    border-color: var(--card-color, var(--accent));
+    background: var(--paper);
+  }
+  .i-card.selected::before { opacity: 0.06; }
+  .i-emoji {
+    font-size: 1.3rem;
+    display: block;
+    margin-bottom: 0.4rem;
+    position: relative; z-index: 1;
+    transition: transform 0.2s;
+  }
+  .i-card:hover .i-emoji, .i-card.selected .i-emoji { transform: scale(1.15); }
+  .i-name {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink);
+    position: relative; z-index: 1;
+    line-height: 1.3;
+  }
+  .i-check {
+    position: absolute;
+    top: 0.5rem; right: 0.5rem;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(13,13,13,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.5rem;
+    color: transparent;
+    z-index: 1;
+    transition: all 0.2s;
+  }
+  .i-card.selected .i-check {
+    background: var(--card-color, var(--accent));
+    border-color: var(--card-color, var(--accent));
+    color: white;
+  }
+  .interest-count {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+  .interest-count span { color: var(--accent); font-weight: 500; }
+
+  /* ── IDEOLOGY PILLS ── */
+  .ideology-section { margin-bottom: 1.8rem; }
+  .ideology-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+  }
+  .ideology-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .ideology-pill {
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.2s;
+    background: transparent;
+    font-family: var(--sans);
+  }
+  .ideology-pill:hover {
+    border-color: rgba(13,13,13,0.25);
+    color: var(--ink);
+  }
+  .ideology-pill.selected {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  /* ── PHANTOM REVEAL ── */
+  .phantom-box {
+    background: var(--ink);
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .phantom-box::before {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(200,67,42,0.15) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .phantom-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.35);
+    margin-bottom: 0.8rem;
+  }
+  .phantom-alias {
+    font-family: var(--serif);
+    font-size: 2.2rem;
+    font-style: italic;
+    color: var(--paper);
+    letter-spacing: -0.02em;
+    position: relative; z-index: 1;
+  }
+  .phantom-alias span { color: var(--accent); }
+  .phantom-sub {
+    font-size: 0.78rem;
+    color: rgba(245,240,232,0.35);
+    margin-top: 0.6rem;
+    line-height: 1.6;
+  }
+
+  /* summary tags */
+  .summary-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .summary-tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 2px;
+  }
+  .summary-tag.accent {
+    border-color: rgba(200,67,42,0.4);
+    color: var(--accent);
+    background: rgba(200,67,42,0.05);
+  }
+  .summary-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    width: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1rem;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s;
+    margin-top: 0.5rem;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .btn-primary:hover::after { transform: translateX(0); }
+  .btn-primary span { position: relative; z-index: 1; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary:disabled::after { display: none; }
+
+  .btn-back {
+    background: none;
+    border: none;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s;
+  }
+  .btn-back:hover { color: var(--ink); }
+  .btn-back::before { content: '←'; }
+
+  .btn-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* signin link */
+  .signin-link {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 1.5rem;
+  }
+  .signin-link a {
+    color: var(--ink);
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 1px;
+  }
+
+  /* error */
+  .field-error {
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-top: 0.35rem;
+    display: none;
+  }
+  .field-error.visible { display: block; }
+
+  /* success tick */
+  .success-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    margin: 0 auto 1.5rem;
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  @media (max-width: 768px) {
+    .left-panel { display: none; }
+    .right-panel { padding: 2rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="lp-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Kind<em>red</em></a></div>
+
+  <div class="lp-mid">
+    <div class="lp-title" id="lpTitle">Welcome <em>back.</em></div>
+    <div class="lp-desc" id="lpDesc">Enter your username and password to return to your phantom identity.</div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="form-container">
+
+    <div class="step-view active" id="step0">
+      <div class="form-title">Enter the <em>unknown.</em></div>
+      <div class="form-sub">We missed you.</div>
+
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="your_alias" autocomplete="off" />
+        <div class="field-error" id="usernameError">Username required.</div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="your secret" />
+        <div class="field-error" id="passwordError">Password required.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="loginBtn" onclick="submitLogin()"><span>Sign In →</span></button>
+      </div>
+      <div class="signin-link">Don't have an account? <a href="kindred-signup.html">Create one</a></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── Initial page entrance ──
+  gsap.from('.lp-logo',       { y: -30, opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.1 });
+  gsap.from('.lp-mid',        { y: 40,  opacity: 0, duration: 0.8, ease: 'power3.out', delay: 0.3 });
+  gsap.from('.form-container',{ x: 40,  opacity: 0, duration: 0.9, ease: 'power3.out', delay: 0.2 });
+
+  // ── CTA button magnetic ──
+  document.querySelectorAll('.btn-primary').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      gsap.to(btn, { x: (e.clientX - r.left - r.width/2) * 0.2, y: (e.clientY - r.top - r.height/2) * 0.2, duration: 0.35, ease: 'power2.out' });
+    });
+    btn.addEventListener('mouseleave', () => {
+      gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)' });
+    });
+  });
+
+  async function submitLogin() {
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Authenticating...';
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    let valid = true;
+    if (!username) { document.getElementById('usernameError').classList.add('visible'); valid = false; }
+    else { document.getElementById('usernameError').classList.remove('visible'); }
+    if (!password) { document.getElementById('passwordError').classList.add('visible'); valid = false; }
+    else { document.getElementById('passwordError').classList.remove('visible'); }
+
+    if (!valid) {
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Sign In →';
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            localStorage.setItem('kindred_token', data.token);
+            window.location.href = 'kindred-chat.html';
+        } else {
+            alert('Login failed: ' + data.error);
+            btn.disabled = false;
+            btn.querySelector('span').textContent = 'Sign In →';
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Network error. Is the server running?');
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Sign In →';
+    }
+  }
+</script>
+</body>
+</html>

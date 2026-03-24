@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindred — Your Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --surface: #111114;
+    --surface2: #17171b;
+    --surface3: #1e1e24;
+    --border: rgba(255,255,255,0.07);
+    --border-lit: rgba(255,255,255,0.14);
+    --text: #e8e4dc;
+    --muted: rgba(232,228,220,0.38);
+    --muted2: rgba(232,228,220,0.55);
+    --accent: #c8432a;
+    --accent-dim: rgba(200,67,42,0.15);
+    --green: #2a7a52;
+    --green-lit: #5ecf96;
+    --gold: #b8912a;
+    --gold-lit: #e8c96a;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Cormorant Garamond', serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(200,67,42,0.3); border-radius: 2px; }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.9rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-logo { font-family: var(--serif); font-size: 1.4rem; color: var(--text); letter-spacing: -0.01em; text-decoration: none; }
+  .topbar-logo em { font-style: italic; color: var(--accent); }
+  .topbar-nav { display: flex; gap: 0.3rem; background: var(--bg); padding: 0.3rem; border-radius: 999px; border: 1px solid var(--border); }
+  .nav-btn {
+    font-family: var(--sans); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.07em;
+    text-transform: uppercase; padding: 0.4rem 1.2rem; border-radius: 999px; border: none;
+    background: transparent; color: var(--muted); cursor: pointer; transition: background 0.2s, color 0.2s;
+    text-decoration: none; display: inline-flex; align-items: center;
+  }
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border-lit); }
+  .topbar-alias { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; }
+  .topbar-alias span { color: var(--accent); }
+
+  /* LAYOUT */
+  .page { max-width: 960px; margin: 0 auto; padding: 3rem 2rem; display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: start; }
+
+  /* LEFT SIDEBAR */
+  .profile-sidebar { display: flex; flex-direction: column; gap: 1.2rem; position: sticky; top: 5rem; }
+
+  .phantom-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 2px;
+    padding: 2rem; text-align: center; position: relative; overflow: hidden;
+  }
+  .phantom-card::before {
+    content: ''; position: absolute; width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(200,67,42,0.12) 0%, transparent 70%);
+    top: -60px; left: 50%; transform: translateX(-50%); pointer-events: none;
+  }
+  .phantom-glyph {
+    width: 72px; height: 72px; border-radius: 50%; background: var(--bg);
+    border: 1.5px solid var(--border-lit); display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.2rem; font-family: var(--serif); font-size: 2rem; font-style: italic;
+    color: var(--muted2); position: relative; z-index: 1;
+  }
+  .phantom-name { font-family: var(--mono); font-size: 0.85rem; letter-spacing: 0.12em; color: var(--text); margin-bottom: 0.3rem; }
+  .phantom-name em { font-style: normal; color: var(--accent); }
+  .phantom-since { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 1.4rem; }
+  .phantom-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.1rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
+  .stat { display: flex; flex-direction: column; gap: 0.25rem; }
+  .stat-num { font-family: var(--serif); font-size: 1.6rem; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-label { font-family: var(--mono); font-size: 0.57rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+
+  .anon-card { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 1.4rem; }
+  .card-label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase; margin-bottom: 1rem; }
+  .anon-levels { display: flex; flex-direction: column; gap: 0.5rem; }
+  .anon-level {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.8rem;
+    border-radius: 2px; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+    background: transparent; color: var(--text); font-family: var(--sans); font-size: 0.8rem; text-align: left; width: 100%;
+  }
+  .anon-level:hover { border-color: var(--border-lit); background: var(--surface2); }
+  .anon-level.active { border-color: rgba(200,67,42,0.4); background: var(--accent-dim); }
+  .anon-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .anon-level:nth-child(1) .anon-dot { background: var(--green-lit); }
+  .anon-level:nth-child(2) .anon-dot { background: var(--gold-lit); }
+  .anon-level:nth-child(3) .anon-dot { background: var(--accent); }
+  .anon-desc { font-size: 0.7rem; color: var(--muted); margin-top: 0.1rem; }
+  .anon-level-text { flex: 1; }
+
+  .danger-card { background: var(--surface); border: 1px solid rgba(200,67,42,0.2); border-radius: 2px; padding: 1.4rem; }
+  .danger-btn {
+    width: 100%; padding: 0.6rem; background: transparent;
+    border: 1px solid rgba(200,67,42,0.3); border-radius: 2px;
+    color: var(--accent); font-family: var(--mono); font-size: 0.68rem;
+    letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; margin-top: 0.5rem;
+  }
+  .danger-btn:first-of-type { margin-top: 0; }
+  .danger-btn:hover { background: var(--accent-dim); border-color: var(--accent); }
+
+  /* RIGHT MAIN */
+  .profile-main { display: flex; flex-direction: column; gap: 1.5rem; }
+  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.6rem; border-bottom: 1px solid var(--border); }
+  .section-title { font-family: var(--serif); font-size: 1.1rem; font-weight: 400; letter-spacing: -0.01em; }
+  .section-title em { font-style: italic; color: var(--accent); }
+  .edit-btn {
+    font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.35rem 0.9rem; border: 1px solid var(--border-lit); border-radius: 2px;
+    background: transparent; color: var(--muted2); cursor: pointer; transition: all 0.2s;
+  }
+  .edit-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .edit-btn.saving { border-color: var(--green); color: var(--green-lit); }
+  .section-body { padding: 1.6rem; }
+
+  /* BIO */
+  .bio-text { font-family: var(--serif); font-size: 1.05rem; line-height: 1.7; color: var(--text); font-style: italic; }
+  .bio-textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--border-lit); border-radius: 2px;
+    color: var(--text); font-family: var(--serif); font-size: 1.05rem; font-style: italic;
+    line-height: 1.7; padding: 0.8rem 1rem; resize: none; min-height: 80px; outline: none;
+    transition: border-color 0.2s; display: none;
+  }
+  .bio-textarea:focus { border-color: rgba(200,67,42,0.5); }
+  .bio-count { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em; color: var(--muted); text-align: right; margin-top: 0.5rem; display: none; }
+  .bio-count.warn { color: var(--accent); }
+  .pill-section-label { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase; margin-bottom: 0.5rem; margin-top: 0.8rem; }
+  .pills-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.4rem; }
+  .pill {
+    font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em;
+    padding: 0.3rem 0.85rem; border-radius: 999px; border: 1px solid var(--border-lit);
+    color: var(--muted2); background: transparent; cursor: pointer; transition: all 0.2s;
+  }
+  .pill.active { border-color: rgba(200,67,42,0.45); background: var(--accent-dim); color: var(--accent); }
+  .pill:hover:not(.active) { border-color: var(--border-lit); color: var(--text); }
+
+  /* INTERESTS */
+  .interests-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .interest-tag {
+    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em;
+    padding: 0.4rem 1rem; border-radius: 2px; border: 1px solid var(--border-lit);
+    color: var(--text); background: var(--surface2); position: relative; transition: all 0.2s; user-select: none;
+  }
+  .interest-tag.removable { cursor: pointer; padding-right: 1.8rem; }
+  .interest-tag.removable:hover { border-color: rgba(200,67,42,0.5); background: var(--accent-dim); color: var(--accent); }
+  .interest-tag .remove-x { position: absolute; right: 0.55rem; top: 50%; transform: translateY(-50%); font-size: 0.65rem; color: var(--muted); display: none; }
+  .interest-tag.removable:hover .remove-x { display: inline; }
+  .add-interest-area { display: none; margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+  .add-interest-area .card-label { margin-bottom: 0.7rem; }
+  .all-interests { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .addable-tag {
+    font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.07em;
+    padding: 0.35rem 0.85rem; border-radius: 2px; border: 1px dashed var(--border-lit);
+    color: var(--muted2); cursor: pointer; transition: all 0.2s; background: transparent;
+  }
+  .addable-tag:hover { border-color: rgba(42,122,82,0.5); color: var(--green-lit); background: rgba(42,122,82,0.08); }
+  .addable-tag.added { display: none; }
+
+  /* MATCHES */
+  .match-list { display: flex; flex-direction: column; gap: 0; }
+  .match-row { display: flex; align-items: center; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .match-row:last-child { border-bottom: none; }
+  .match-avatar {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border-lit);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: 1.1rem; font-style: italic; color: var(--muted2); flex-shrink: 0;
+  }
+  .match-info { flex: 1; }
+  .match-alias { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--text); margin-bottom: 0.3rem; }
+  .match-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .match-tag { font-family: var(--mono); font-size: 0.57rem; letter-spacing: 0.06em; padding: 0.15rem 0.5rem; border: 1px solid var(--border); color: var(--muted); border-radius: 2px; }
+  .match-tag.shared { border-color: rgba(42,122,82,0.4); color: var(--green-lit); background: rgba(42,122,82,0.06); }
+  .match-pct-badge { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.06em; padding: 0.3rem 0.75rem; border-radius: 999px; flex-shrink: 0; }
+  .match-pct-badge.high { background: rgba(42,122,82,0.12); border: 1px solid rgba(42,122,82,0.35); color: var(--green-lit); }
+  .match-pct-badge.mid { background: rgba(184,145,42,0.1); border: 1px solid rgba(184,145,42,0.35); color: var(--gold-lit); }
+  .match-pct-badge.low { background: var(--accent-dim); border: 1px solid rgba(200,67,42,0.3); color: var(--accent); }
+  .match-chat-btn {
+    font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.3rem 0.8rem; border: 1px solid var(--border-lit); border-radius: 2px;
+    background: transparent; color: var(--muted2); cursor: pointer; transition: all 0.2s;
+    text-decoration: none; flex-shrink: 0;
+  }
+  .match-chat-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* TIMELINE */
+  .timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
+  .timeline::before { content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 1px; background: var(--border); }
+  .timeline-item { display: flex; gap: 1rem; padding: 0.75rem 0; align-items: flex-start; }
+  .timeline-dot {
+    width: 23px; height: 23px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border-lit); display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; flex-shrink: 0; position: relative; z-index: 1;
+  }
+  .timeline-content { flex: 1; padding-top: 0.2rem; }
+  .timeline-text { font-size: 0.82rem; color: var(--text); margin-bottom: 0.2rem; line-height: 1.4; }
+  .timeline-text strong { font-weight: 500; }
+  .timeline-time { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em; color: var(--muted); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--surface); border: 1px solid rgba(42,122,82,0.4); border-radius: 2px;
+    padding: 0.75rem 1.6rem; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em;
+    color: var(--green-lit); z-index: 999; opacity: 0; pointer-events: none;
+  }
+
+  /* CURSOR */
+  .cursor-dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); }
+  .cursor-ring { width: 24px; height: 24px; border: 1px solid rgba(200,67,42,0.5); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); }
+</style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="toast" id="toast">✦ Changes saved</div>
+
+<nav class="topbar" id="topbar">
+  <a href="campus-connect.html" class="topbar-logo">Kind<em>red</em></a>
+  <div class="topbar-nav">
+    <a href="kindred-chat.html" class="nav-btn">Discover</a>
+    <a href="kindred-chat.html" class="nav-btn">Messages</a>
+    <a href="kindred-profile.html" class="nav-btn active">Profile</a>
+  </div>
+  <div class="topbar-alias">You are <span>Phantom #7741</span></div>
+</nav>
+
+<div class="page">
+
+  <aside class="profile-sidebar" id="sidebar">
+
+    <div class="phantom-card" id="phantomCard">
+      <div class="phantom-glyph">A</div>
+      <div class="phantom-name">Phantom <em>#7741</em></div>
+      <div class="phantom-since">Member since Feb 2025</div>
+      <div class="phantom-stats">
+        <div class="stat"><div class="stat-num" id="statMatches">0</div><div class="stat-label">Matches</div></div>
+        <div class="stat"><div class="stat-num" id="statChats">0</div><div class="stat-label">Chats</div></div>
+        <div class="stat"><div class="stat-num" id="statScore">0%</div><div class="stat-label">Avg Match</div></div>
+      </div>
+    </div>
+
+    <div class="anon-card" id="anonCard">
+      <div class="card-label">Anonymity Level</div>
+      <div class="anon-levels">
+        <button class="anon-level active" onclick="setAnon(this)">
+          <div class="anon-dot"></div>
+          <div class="anon-level-text"><div>Phantom</div><div class="anon-desc">Alias only, no hints</div></div>
+        </button>
+        <button class="anon-level" onclick="setAnon(this)">
+          <div class="anon-dot"></div>
+          <div class="anon-level-text"><div>Shadow</div><div class="anon-desc">Show college, hide name</div></div>
+        </button>
+        <button class="anon-level" onclick="setAnon(this)">
+          <div class="anon-dot"></div>
+          <div class="anon-level-text"><div>Revealed</div><div class="anon-desc">Show first name only</div></div>
+        </button>
+      </div>
+    </div>
+
+    <div class="danger-card" id="dangerCard">
+      <div class="card-label">Danger Zone</div>
+      <button class="danger-btn" onclick="showToast('Alias regenerated — you are now Phantom #2218')">↺ Regenerate Alias</button>
+      <button class="danger-btn" style="opacity:0.6" onclick="showToast('Account deletion request sent')">✕ Delete Account</button>
+    </div>
+
+  </aside>
+
+  <main class="profile-main">
+
+    <!-- BIO -->
+    <div class="section-card" id="bioCard">
+      <div class="section-header">
+        <div class="section-title">Bio <em>&</em> Vibe</div>
+        <button class="edit-btn" id="bioEditBtn" onclick="toggleBioEdit()">Edit</button>
+      </div>
+      <div class="section-body">
+        <div class="bio-text" id="bioDisplay">Trying to reconcile determinism with the feeling that choices matter. Usually found reading Frankfurt at 2am or overanalyzing chess endgames. Strong opinions on epistemology, weak opinions on everything else.</div>
+        <textarea class="bio-textarea" id="bioTextarea" maxlength="160" placeholder="Write your bio…"></textarea>
+        <div class="bio-count" id="bioCount">0 / 160</div>
+
+        <div class="pill-section-label" style="margin-top:1.2rem;">Ideology</div>
+        <div class="pills-row">
+          <button class="pill active" onclick="togglePill(this)">Rationalist</button>
+          <button class="pill active" onclick="togglePill(this)">Stoic</button>
+          <button class="pill" onclick="togglePill(this)">Libertarian</button>
+          <button class="pill" onclick="togglePill(this)">Progressive</button>
+          <button class="pill" onclick="togglePill(this)">Pragmatist</button>
+          <button class="pill" onclick="togglePill(this)">Existentialist</button>
+        </div>
+
+        <div class="pill-section-label">Vibe</div>
+        <div class="pills-row">
+          <button class="pill active" onclick="togglePill(this)">Deep talks</button>
+          <button class="pill active" onclick="togglePill(this)">Night owl</button>
+          <button class="pill" onclick="togglePill(this)">Meme fluent</button>
+          <button class="pill" onclick="togglePill(this)">Study buddy</button>
+          <button class="pill active" onclick="togglePill(this)">Debate mode</button>
+          <button class="pill" onclick="togglePill(this)">Chill vibes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERESTS -->
+    <div class="section-card" id="interestsCard">
+      <div class="section-header">
+        <div class="section-title"><em>Interests</em></div>
+        <button class="edit-btn" id="intEditBtn" onclick="toggleInterestEdit()">Edit</button>
+      </div>
+      <div class="section-body">
+        <div class="interests-grid" id="interestsGrid">
+          <div class="interest-tag removable" onclick="removeInterest(this)">Philosophy <span class="remove-x">×</span></div>
+          <div class="interest-tag removable" onclick="removeInterest(this)">Literature <span class="remove-x">×</span></div>
+          <div class="interest-tag removable" onclick="removeInterest(this)">Chess <span class="remove-x">×</span></div>
+          <div class="interest-tag removable" onclick="removeInterest(this)">AI & ML <span class="remove-x">×</span></div>
+          <div class="interest-tag removable" onclick="removeInterest(this)">Open Source <span class="remove-x">×</span></div>
+          <div class="interest-tag removable" onclick="removeInterest(this)">Stoicism <span class="remove-x">×</span></div>
+          <div class="interest-tag removable" onclick="removeInterest(this)">Debate <span class="remove-x">×</span></div>
+        </div>
+        <div class="add-interest-area" id="addInterestArea">
+          <div class="card-label">Add more interests</div>
+          <div class="all-interests">
+            <span class="addable-tag" onclick="addInterest(this)">Climate</span>
+            <span class="addable-tag" onclick="addInterest(this)">Psychology</span>
+            <span class="addable-tag" onclick="addInterest(this)">Economics</span>
+            <span class="addable-tag" onclick="addInterest(this)">Music Theory</span>
+            <span class="addable-tag" onclick="addInterest(this)">Film</span>
+            <span class="addable-tag" onclick="addInterest(this)">Mathematics</span>
+            <span class="addable-tag" onclick="addInterest(this)">History</span>
+            <span class="addable-tag" onclick="addInterest(this)">Startups</span>
+            <span class="addable-tag" onclick="addInterest(this)">Poetry</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCHES -->
+    <div class="section-card" id="matchCard">
+      <div class="section-header">
+        <div class="section-title">Recent <em>Matches</em></div>
+      </div>
+      <div class="section-body" style="padding:0 1.6rem;">
+        <div class="match-list">
+          <div class="match-row">
+            <div class="match-avatar">P</div>
+            <div class="match-info">
+              <div class="match-alias">Phantom #3302</div>
+              <div class="match-tags">
+                <span class="match-tag shared">✦ Philosophy</span>
+                <span class="match-tag shared">✦ Literature</span>
+                <span class="match-tag">Debate</span>
+              </div>
+            </div>
+            <div class="match-pct-badge high">91%</div>
+            <a href="kindred-chat.html" class="match-chat-btn">Chat →</a>
+          </div>
+          <div class="match-row">
+            <div class="match-avatar">Q</div>
+            <div class="match-info">
+              <div class="match-alias">Phantom #5519</div>
+              <div class="match-tags">
+                <span class="match-tag shared">✦ Open Source</span>
+                <span class="match-tag shared">✦ AI & ML</span>
+                <span class="match-tag">Climate</span>
+              </div>
+            </div>
+            <div class="match-pct-badge mid">78%</div>
+            <a href="kindred-chat.html" class="match-chat-btn">Chat →</a>
+          </div>
+          <div class="match-row">
+            <div class="match-avatar">S</div>
+            <div class="match-info">
+              <div class="match-alias">Phantom #9043</div>
+              <div class="match-tags">
+                <span class="match-tag shared">✦ Philosophy</span>
+                <span class="match-tag">Chess</span>
+                <span class="match-tag">Stoicism</span>
+              </div>
+            </div>
+            <div class="match-pct-badge low">64%</div>
+            <a href="kindred-chat.html" class="match-chat-btn">Chat →</a>
+          </div>
+          <div class="match-row">
+            <div class="match-avatar">M</div>
+            <div class="match-info">
+              <div class="match-alias">Phantom #1187</div>
+              <div class="match-tags">
+                <span class="match-tag shared">✦ AI & ML</span>
+                <span class="match-tag shared">✦ Chess</span>
+                <span class="match-tag">Mathematics</span>
+              </div>
+            </div>
+            <div class="match-pct-badge high">87%</div>
+            <a href="kindred-chat.html" class="match-chat-btn">Chat →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="section-card" id="activityCard">
+      <div class="section-header">
+        <div class="section-title">Activity</div>
+      </div>
+      <div class="section-body">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot">✦</div>
+            <div class="timeline-content">
+              <div class="timeline-text">Matched with <strong>Phantom #1187</strong> — 87% interest overlap</div>
+              <div class="timeline-time">2 hours ago</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot">◈</div>
+            <div class="timeline-content">
+              <div class="timeline-text">Sent 12 messages in conversation with <strong>Phantom #3302</strong></div>
+              <div class="timeline-time">Yesterday, 11:49 PM</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot">+</div>
+            <div class="timeline-content">
+              <div class="timeline-text">Added <strong>Debate</strong> to interests</div>
+              <div class="timeline-time">3 days ago</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot">✦</div>
+            <div class="timeline-content">
+              <div class="timeline-text">Matched with <strong>Phantom #5519</strong> — 78% interest overlap</div>
+              <div class="timeline-time">5 days ago</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot">◎</div>
+            <div class="timeline-content">
+              <div class="timeline-text">Joined Kindred as <strong>Phantom #7741</strong></div>
+              <div class="timeline-time">Feb 14, 2025</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // CURSOR
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  gsap.ticker.add(() => {
+    gsap.set(dot, { x: mx, y: my });
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    gsap.set(ring, { x: rx, y: ry });
+  });
+  document.querySelectorAll('button, a, .interest-tag, .pill, .addable-tag').forEach(el => {
+    el.addEventListener('mouseenter', () => gsap.to(ring, { scale: 1.8, opacity: 0.6, duration: 0.2 }));
+    el.addEventListener('mouseleave', () => gsap.to(ring, { scale: 1, opacity: 1, duration: 0.2 }));
+  });
+
+  // ENTRANCE
+  gsap.from('#topbar',      { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+  gsap.from('#phantomCard', { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.1 });
+  gsap.from('#anonCard',    { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.2 });
+  gsap.from('#dangerCard',  { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.3 });
+  gsap.from('#bioCard',         { y: 40, opacity: 0, duration: 0.55, ease: 'power3.out', delay: 0.15 });
+  gsap.from('#interestsCard',   { y: 40, opacity: 0, duration: 0.55, ease: 'power3.out', delay: 0.25 });
+  gsap.from('#matchCard',       { y: 40, opacity: 0, duration: 0.55, ease: 'power3.out', delay: 0.35 });
+  gsap.from('#activityCard',    { y: 40, opacity: 0, duration: 0.55, ease: 'power3.out', delay: 0.45 });
+
+  // STAT COUNTERS
+  function animateCount(el, target, suffix='') {
+    const dur = 1200, startTime = performance.now();
+    function tick(now) {
+      const t = Math.min((now - startTime) / dur, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * ease) + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  setTimeout(() => {
+    animateCount(document.getElementById('statMatches'), 12);
+    animateCount(document.getElementById('statChats'), 8);
+    animateCount(document.getElementById('statScore'), 91, '%');
+  }, 300);
+
+  gsap.from('.match-row',      { x: -20, opacity: 0, duration: 0.4, stagger: 0.08, ease: 'power3.out', delay: 0.5 });
+  gsap.from('.timeline-item',  { x: -15, opacity: 0, duration: 0.35, stagger: 0.07, ease: 'power3.out', delay: 0.6 });
+
+  // TOAST
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = '✦ ' + msg;
+    gsap.killTweensOf(t);
+    gsap.to(t, { y: 0, opacity: 1, duration: 0.4, ease: 'back.out(1.7)' });
+    gsap.to(t, { y: 80, opacity: 0, duration: 0.4, ease: 'power3.in', delay: 2.5 });
+  }
+
+  // BIO EDIT
+  let bioEditing = false;
+  const bioDisplay = document.getElementById('bioDisplay');
+  const bioTextarea = document.getElementById('bioTextarea');
+  const bioCount = document.getElementById('bioCount');
+  const bioEditBtn = document.getElementById('bioEditBtn');
+
+  function toggleBioEdit() {
+    bioEditing = !bioEditing;
+    if (bioEditing) {
+      bioTextarea.value = bioDisplay.textContent.trim();
+      bioDisplay.style.display = 'none';
+      bioTextarea.style.display = 'block';
+      bioCount.style.display = 'block';
+      bioCount.textContent = bioTextarea.value.length + ' / 160';
+      bioEditBtn.textContent = 'Save';
+      bioEditBtn.classList.add('saving');
+      bioTextarea.focus();
+      gsap.from(bioTextarea, { opacity: 0, y: 5, duration: 0.25 });
+    } else {
+      bioDisplay.textContent = bioTextarea.value.trim() || bioDisplay.textContent;
+      bioDisplay.style.display = 'block';
+      bioTextarea.style.display = 'none';
+      bioCount.style.display = 'none';
+      bioEditBtn.textContent = 'Edit';
+      bioEditBtn.classList.remove('saving');
+      showToast('Changes saved');
+    }
+  }
+  bioTextarea.addEventListener('input', () => {
+    const len = bioTextarea.value.length;
+    bioCount.textContent = len + ' / 160';
+    bioCount.classList.toggle('warn', len > 140);
+  });
+
+  // PILLS
+  function togglePill(el) {
+    el.classList.toggle('active');
+    gsap.from(el, { scale: 0.88, duration: 0.3, ease: 'back.out(2)' });
+  }
+
+  // INTERESTS
+  let intEditing = false;
+  const intEditBtn = document.getElementById('intEditBtn');
+  const addArea = document.getElementById('addInterestArea');
+
+  function toggleInterestEdit() {
+    intEditing = !intEditing;
+    if (intEditing) {
+      addArea.style.display = 'block';
+      gsap.from(addArea, { opacity: 0, y: 8, duration: 0.3 });
+      intEditBtn.textContent = 'Done';
+      intEditBtn.classList.add('saving');
+    } else {
+      addArea.style.display = 'none';
+      intEditBtn.textContent = 'Edit';
+      intEditBtn.classList.remove('saving');
+      showToast('Interests updated');
+    }
+  }
+
+  function removeInterest(el) {
+    if (!intEditing) return;
+    const name = el.textContent.replace('×', '').trim();
+    gsap.to(el, { scale: 0, opacity: 0, duration: 0.25, ease: 'power2.in', onComplete: () => {
+      el.remove();
+      document.querySelectorAll('.addable-tag').forEach(t => {
+        if (t.textContent.trim() === name) t.classList.remove('added');
+      });
+    }});
+  }
+
+  function addInterest(el) {
+    el.classList.add('added');
+    const tag = document.createElement('div');
+    tag.className = 'interest-tag removable';
+    tag.innerHTML = el.textContent.trim() + ' <span class="remove-x">×</span>';
+    tag.onclick = () => removeInterest(tag);
+    document.getElementById('interestsGrid').appendChild(tag);
+    gsap.from(tag, { scale: 0.6, opacity: 0, duration: 0.35, ease: 'back.out(2)' });
+  }
+
+  // ANON LEVEL
+  function setAnon(el) {
+    document.querySelectorAll('.anon-level').forEach(l => l.classList.remove('active'));
+    el.classList.add('active');
+    gsap.from(el, { scale: 0.96, duration: 0.3, ease: 'back.out(2)' });
+    showToast('Anonymity level updated');
+  }
+</script>
+</body>
+</html>
