@@ -3,8 +3,36 @@ const db = require('../db');
 
 const router = express.Router();
 
+// ── ADMIN AUTH MIDDLEWARE ──
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'kindred-admin-2024';
+
+// POST /admin/login — verify admin password, return a session token
+router.post('/login', (req, res) => {
+    const { password } = req.body;
+    if (password === ADMIN_PASSWORD) {
+        // Simple base64 session token (good enough for admin page)
+        const token = Buffer.from(`admin:${Date.now()}:${ADMIN_PASSWORD}`).toString('base64');
+        res.json({ success: true, token });
+    } else {
+        res.status(401).json({ success: false, error: 'Wrong password' });
+    }
+});
+
+// Middleware to protect all other admin routes
+function requireAdmin(req, res, next) {
+    const token = req.headers['x-admin-token'];
+    if (!token) return res.status(401).json({ error: 'Admin token required' });
+    try {
+        const decoded = Buffer.from(token, 'base64').toString('utf8');
+        if (decoded.startsWith('admin:') && decoded.endsWith(`:${ADMIN_PASSWORD}`)) {
+            return next();
+        }
+    } catch(e) {}
+    res.status(401).json({ error: 'Invalid admin token' });
+}
+
 // GET /admin/dashboard-data — returns all tables for the dashboard
-router.get('/dashboard-data', async (req, res) => {
+router.get('/dashboard-data', requireAdmin, async (req, res) => {
     try {
         const [users, interests, userInterests, swipes, matches, conversations, messages] = await Promise.all([
             db.query(`SELECT id, username, phantom_alias, bio, ideology, vibe, anonymity_level, created_at FROM users ORDER BY id`),
@@ -89,7 +117,7 @@ router.get('/dashboard-data', async (req, res) => {
 });
 
 // POST /admin/delete-users — deletes specific users by username (cascade handles the rest)
-router.post('/delete-users', async (req, res) => {
+router.post('/delete-users', requireAdmin, async (req, res) => {
     try {
         const { usernames } = req.body;
         if (!usernames || !Array.isArray(usernames) || usernames.length === 0) {
@@ -107,7 +135,7 @@ router.post('/delete-users', async (req, res) => {
 });
 
 // GET /admin/nuke-recent?hours=24 — deletes all data created in last N hours (default 24h)
-router.get('/nuke-recent', async (req, res) => {
+router.get('/nuke-recent', requireAdmin, async (req, res) => {
     const hours = parseInt(req.query.hours) || 24;
     const client = await require('../db')._pool
         ? require('../db')._pool.connect()
