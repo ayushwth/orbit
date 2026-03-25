@@ -752,9 +752,10 @@
 
       document.querySelector('.topbar-alias span').textContent = me.phantom_alias;
 
-      // 2. Initialize Socket.IO
+      // 2. Initialize Socket.IO — polling first for Render compatibility, upgrades to WS
       socket = io('', {
-        auth: { token }
+        auth: { token },
+        transports: ['polling', 'websocket']
       });
 
       socket.on('connect', () => console.log('Connected to chat server'));
@@ -1036,6 +1037,11 @@
     if (!convo) return;
     convo.unread = false;
     buildConvoList();
+
+    // ✅ Join the socket room so we receive real-time messages
+    if (socket && socket.connected) {
+      socket.emit('join_conversation', id);
+    }
 
     const main = document.getElementById('chatMain');
     main.innerHTML = `
