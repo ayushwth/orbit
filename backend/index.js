@@ -28,12 +28,12 @@ app.use(express.static(path.join(__dirname, '../')));
 
 // Serve login page as the absolute default entry
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../kindred-login.html'));
+    res.sendFile(path.join(__dirname, '../orbit-login.html'));
 });
 
 // Fallback Basic route for API root
 app.get('/api', (req, res) => {
-    res.json({ message: 'Welcome to Kindred Backend API' });
+    res.json({ message: 'Welcome to Orbit Backend API' });
 });
 
 // Setup Socket.io

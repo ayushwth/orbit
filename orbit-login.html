@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kindred — Join</title>
+<title>Orbit — Join</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
@@ -519,7 +519,7 @@
 
 <!-- LEFT PANEL -->
 <div class="left-panel">
-  <div class="lp-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Kind<em>red</em></a></div>
+  <div class="lp-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Orb<em>it</em></a></div>
 
   <div class="lp-mid">
     <div class="lp-title" id="lpTitle">Welcome <em>back.</em></div>
@@ -550,7 +550,7 @@
       <div class="btn-row">
         <button class="btn-primary" id="loginBtn" onclick="submitLogin()"><span>Sign In →</span></button>
       </div>
-      <div class="signin-link">Don't have an account? <a href="kindred-signup.html">Create one</a></div>
+      <div class="signin-link">Don't have an account? <a href="orbit-signup.html">Create one</a></div>
     </div>
 
   </div>
@@ -603,8 +603,8 @@
         const data = await response.json();
         
         if (response.ok) {
-            localStorage.setItem('kindred_token', data.token);
-            window.location.href = 'kindred-chat.html';
+            localStorage.setItem('orbit_token', data.token);
+            window.location.href = 'orbit-chat.html';
         } else {
             alert('Login failed: ' + data.error);
             btn.disabled = false;

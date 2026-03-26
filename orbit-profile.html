@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kindred — Your Profile</title>
+<title>Orbit — Your Profile</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
@@ -229,11 +229,11 @@
 <div class="toast" id="toast">✦ Changes saved</div>
 
 <nav class="topbar" id="topbar">
-  <a href="campus-connect.html" class="topbar-logo">Kind<em>red</em></a>
+  <a href="campus-connect.html" class="topbar-logo">Orb<em>it</em></a>
   <div class="topbar-nav">
-    <a href="kindred-chat.html" class="nav-btn">Discover</a>
-    <a href="kindred-chat.html" class="nav-btn">Messages</a>
-    <a href="kindred-profile.html" class="nav-btn active">Profile</a>
+    <a href="orbit-chat.html" class="nav-btn">Discover</a>
+    <a href="orbit-chat.html" class="nav-btn">Messages</a>
+    <a href="orbit-profile.html" class="nav-btn active">Profile</a>
   </div>
   <div class="topbar-alias">You are <span>Phantom #7741</span></div>
 </nav>
@@ -365,7 +365,7 @@
               </div>
             </div>
             <div class="match-pct-badge high">91%</div>
-            <a href="kindred-chat.html" class="match-chat-btn">Chat →</a>
+            <a href="orbit-chat.html" class="match-chat-btn">Chat →</a>
           </div>
           <div class="match-row">
             <div class="match-avatar">Q</div>
@@ -378,7 +378,7 @@
               </div>
             </div>
             <div class="match-pct-badge mid">78%</div>
-            <a href="kindred-chat.html" class="match-chat-btn">Chat →</a>
+            <a href="orbit-chat.html" class="match-chat-btn">Chat →</a>
           </div>
           <div class="match-row">
             <div class="match-avatar">S</div>
@@ -391,7 +391,7 @@
               </div>
             </div>
             <div class="match-pct-badge low">64%</div>
-            <a href="kindred-chat.html" class="match-chat-btn">Chat →</a>
+            <a href="orbit-chat.html" class="match-chat-btn">Chat →</a>
           </div>
           <div class="match-row">
             <div class="match-avatar">M</div>
@@ -404,7 +404,7 @@
               </div>
             </div>
             <div class="match-pct-badge high">87%</div>
-            <a href="kindred-chat.html" class="match-chat-btn">Chat →</a>
+            <a href="orbit-chat.html" class="match-chat-btn">Chat →</a>
           </div>
         </div>
       </div>
@@ -448,7 +448,7 @@
           <div class="timeline-item">
             <div class="timeline-dot">◎</div>
             <div class="timeline-content">
-              <div class="timeline-text">Joined Kindred as <strong>Phantom #7741</strong></div>
+              <div class="timeline-text">Joined Orbit as <strong>Phantom #7741</strong></div>
               <div class="timeline-time">Feb 14, 2025</div>
             </div>
           </div>
@@ -486,9 +486,9 @@
   gsap.from('#activityCard',    { y: 40, opacity: 0, duration: 0.55, ease: 'power3.out', delay: 0.45 });
 
   // ── AUTH & STATE ──
-  const token = localStorage.getItem('kindred_token');
+  const token = localStorage.getItem('orbit_token');
   if (!token) {
-    window.location.href = 'kindred-login.html';
+    window.location.href = 'orbit-login.html';
   } else {
     fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => { if (!r.ok) throw new Error('Not auth'); return r.json(); })
@@ -534,7 +534,7 @@
       })
       .catch(e => {
         console.error(e);
-        window.location.href = 'kindred-login.html';
+        window.location.href = 'orbit-login.html';
       });
   }
 

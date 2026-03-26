@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kindred — Admin Dashboard</title>
+    <title>Orbit — Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -716,7 +716,7 @@
 
     <header class="header">
         <div class="header-left">
-            <div class="logo">⚡ Kindred</div>
+            <div class="logo">⚡ Orbit</div>
             <span class="badge badge-live"><span class="connection-dot connected" id="connectionDot"></span> ADMIN DASHBOARD</span>
         </div>
         <div class="header-right">
@@ -1202,7 +1202,7 @@
             activities.sort((a, b) => new Date(b.time) - new Date(a.time));
 
             if (activities.length === 0) {
-                feed.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">No activity yet</div><div class="empty-sub">Actions will appear here as users interact with Kindred</div></div>`;
+                feed.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">No activity yet</div><div class="empty-sub">Actions will appear here as users interact with Orbit</div></div>`;
                 return;
             }
 

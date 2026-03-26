@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kindred — Join</title>
+<title>Orbit — Join</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
@@ -519,7 +519,7 @@
 
 <!-- LEFT PANEL -->
 <div class="left-panel">
-  <div class="lp-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Kind<em>red</em></a></div>
+  <div class="lp-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Orb<em>it</em></a></div>
 
   <div class="lp-mid">
     <div class="lp-step-label" id="lpStepLabel">Step 1 of 4</div>
@@ -576,7 +576,7 @@
       <div class="btn-row">
         <button class="btn-primary" onclick="goStep(1)"><span>Continue →</span></button>
       </div>
-      <div class="signin-link">Already have an account? <a href="kindred-chat.html">Sign in</a></div>
+      <div class="signin-link">Already have an account? <a href="orbit-chat.html">Sign in</a></div>
     </div>
 
     <!-- ══ STEP 2: Interests ══ -->
@@ -638,7 +638,7 @@
       <div class="summary-row" id="summaryValues"></div>
 
       <div class="btn-row">
-        <button class="btn-primary" id="submitBtn" onclick="submitRegistration()"><span>Enter Kindred ✦</span></button>
+        <button class="btn-primary" id="submitBtn" onclick="submitRegistration()"><span>Enter Orbit ✦</span></button>
         <button class="btn-back" onclick="goStep(2)">Back</button>
       </div>
     </div>
@@ -649,7 +649,7 @@
         <div class="success-icon">✦</div>
         <div class="form-title" style="text-align:center">You're <em>in.</em></div>
         <div class="form-sub" style="text-align:center; margin-bottom:2.5rem;">Your phantom identity is ready. Time to find your people.</div>
-        <button class="btn-primary" onclick="window.location.href='kindred-chat.html'"><span>Go to Discover →</span></button>
+        <button class="btn-primary" onclick="window.location.href='orbit-chat.html'"><span>Go to Discover →</span></button>
       </div>
     </div>
 
@@ -681,7 +681,7 @@
     },
     {
       label: 'All done!',
-      title: 'Welcome to <em>Kindred.</em>',
+      title: 'Welcome to <em>Orbit.</em>',
       desc: 'Your anonymous journey starts now. Go find your people.',
     },
   ];
@@ -878,7 +878,7 @@
         
         if (response.ok) {
             // Save their token so they stay logged in!
-            localStorage.setItem('kindred_token', data.token);
+            localStorage.setItem('orbit_token', data.token);
             
             // Re-update the summary UI with their ACTUAL generated phantom_alias
             const actualPhantom = data.user.phantom_alias;
@@ -889,13 +889,13 @@
         } else {
             alert('Signup failed: ' + data.error);
             btn.disabled = false;
-            btn.querySelector('span').textContent = 'Enter Kindred ✦';
+            btn.querySelector('span').textContent = 'Enter Orbit ✦';
         }
     } catch (err) {
         console.error('Error connecting to backend:', err);
         alert('Network error. Is the server running?');
         btn.disabled = false;
-        btn.querySelector('span').textContent = 'Enter Kindred ✦';
+        btn.querySelector('span').textContent = 'Enter Orbit ✦';
     }
   }
 </script>

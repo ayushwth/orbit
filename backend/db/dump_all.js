@@ -4,7 +4,7 @@ const db = require('./index');
 async function dumpAll() {
     try {
         console.log('========================================');
-        console.log('  KINDRED DATABASE — FULL DATA DUMP');
+        console.log('  ORBIT DATABASE — FULL DATA DUMP');
         console.log('========================================\n');
 
         // 1. USERS

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kindred — Match & Chat</title>
+<title>Orbit — Match & Chat</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -672,14 +672,14 @@
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Kind<em>red</em></a></div>
+  <div class="topbar-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Orb<em>it</em></a></div>
   <div style="display:flex;align-items:center;gap:1.5rem;margin-left:auto;padding-right:1rem">
-    <a href="kindred-profile.html" style="font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.4);text-decoration:none;font-family:'DM Sans',sans-serif;transition:color 0.2s" onmouseover="this.style.color='rgba(245,240,232,0.85)'" onmouseout="this.style.color='rgba(245,240,232,0.4)'">Profile</a>
+    <a href="orbit-profile.html" style="font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.4);text-decoration:none;font-family:'DM Sans',sans-serif;transition:color 0.2s" onmouseover="this.style.color='rgba(245,240,232,0.85)'" onmouseout="this.style.color='rgba(245,240,232,0.4)'">Profile</a>
   </div>
   <div class="topbar-tabs">
     <button class="tab-btn active" onclick="switchView('match', this)">Discover</button>
     <button class="tab-btn" onclick="switchView('chat', this)">Messages</button>
-    <a href="kindred-profile.html" style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;color:rgba(232,228,220,0.45);text-decoration:none;padding:0.4rem 1rem;border:1px solid rgba(255,255,255,0.08);border-radius:999px;transition:all 0.2s;" onmouseover="this.style.color='#e8e4dc'" onmouseout="this.style.color='rgba(232,228,220,0.45)'">Profile</a>
+    <a href="orbit-profile.html" style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;color:rgba(232,228,220,0.45);text-decoration:none;padding:0.4rem 1rem;border:1px solid rgba(255,255,255,0.08);border-radius:999px;transition:all 0.2s;" onmouseover="this.style.color='#e8e4dc'" onmouseout="this.style.color='rgba(232,228,220,0.45)'">Profile</a>
   </div>
   <div class="topbar-alias">You are <span>Phantom #7741</span></div>
 </div>
@@ -689,7 +689,7 @@
   <!-- ══ MATCH VIEW ══ -->
   <div class="view match-view active" id="matchView">
     <div class="match-header">
-      <h2>Find your <em>kind</em></h2>
+      <h2>Find your <em>orbit</em></h2>
       <p>Swipe right to connect · left to pass</p>
     </div>
 
@@ -726,9 +726,9 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   // ── AUTH & STATE ──
-  const token = localStorage.getItem('kindred_token');
+  const token = localStorage.getItem('orbit_token');
   if (!token) {
-    window.location.href = 'kindred-login.html';
+    window.location.href = 'orbit-login.html';
   }
 
   let me = null;
@@ -799,7 +799,7 @@
 
     } catch (err) {
       console.error(err);
-      window.location.href = 'kindred-login.html';
+      window.location.href = 'orbit-login.html';
     }
   }
 

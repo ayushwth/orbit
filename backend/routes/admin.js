@@ -4,7 +4,7 @@ const db = require('../db');
 const router = express.Router();
 
 // ── ADMIN AUTH MIDDLEWARE ──
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'kindred-admin-2024';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'orbit-admin-2024';
 
 // POST /admin/login — verify admin password, return a session token
 router.post('/login', (req, res) => {
