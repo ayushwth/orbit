@@ -59,8 +59,8 @@ module.exports = function(io) {
                     );
                     const message = result.rows[0];
                     
-                    // Broadcast to room
-                    io.to(`conversation_${conversationId}`).emit('new_message', message);
+                    // Broadcast to others in room
+                    socket.to(`conversation_${conversationId}`).emit('new_message', message);
                 }
             } catch (err) {
                 console.error('Error sending message:', err);

@@ -673,9 +673,7 @@
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Orb<em>it</em></a></div>
-  <div style="display:flex;align-items:center;gap:1.5rem;margin-left:auto;padding-right:1rem">
-    <a href="orbit-profile.html" style="font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.4);text-decoration:none;font-family:'DM Sans',sans-serif;transition:color 0.2s" onmouseover="this.style.color='rgba(245,240,232,0.85)'" onmouseout="this.style.color='rgba(245,240,232,0.4)'">Profile</a>
-  </div>
+
   <div class="topbar-tabs">
     <button class="tab-btn active" onclick="switchView('match', this)">Discover</button>
     <button class="tab-btn" onclick="switchView('chat', this)">Messages</button>
@@ -1257,6 +1255,14 @@
   gsap.from('.topbar-tabs', {
     y: -10, opacity: 0, duration: 0.5, delay: 0.4, ease: 'power3.out'
   });
+  window.onload = () => {
+    if (window.location.search.includes('view=chat')) {
+      setTimeout(() => {
+        const chatBtn = document.querySelectorAll('.tab-btn')[1];
+        if (chatBtn) switchView('chat', chatBtn);
+      }, 50);
+    }
+  };
 </script>
 </body>
 </html>
