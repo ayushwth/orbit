@@ -668,7 +668,7 @@
   }
 </style>
 </head>
-<body>
+<body style="opacity: 0; visibility: hidden;">
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -856,7 +856,7 @@
         const tags = m.interests || [];
         const sharedTags = tags.filter(t => myInterests.includes(t));
 
-        const formattedMsgs = msgs.reverse().map(msg => ({
+        const formattedMsgs = msgs.map(msg => ({
           id: msg.id,
           from: msg.sender_id === me.id ? 'me' : 'them',
           text: msg.content,
@@ -1257,6 +1257,9 @@
       .to(sendBtn, { scale: 0.85, duration: 0.1 })
       .to(sendBtn, { scale: 1, duration: 0.3, ease: 'elastic.out(1.2, 0.4)' });
   });
+
+  gsap.set(document.body, { visibility: 'visible' });
+  gsap.to(document.body, { opacity: 1, duration: 0.3 });
 
   // ── TOPBAR ALIAS shimmer on load ──
   gsap.from('.topbar-alias', {

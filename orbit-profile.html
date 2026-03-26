@@ -222,7 +222,7 @@
   .cursor-ring { width: 24px; height: 24px; border: 1px solid rgba(200,67,42,0.5); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); }
 </style>
 </head>
-<body>
+<body style="opacity: 0; visibility: hidden;">
 
 <div class="cursor-dot" id="cursorDot"></div>
 <div class="cursor-ring" id="cursorRing"></div>
@@ -476,6 +476,8 @@
   });
 
   // ENTRANCE
+  gsap.set(document.body, { visibility: 'visible' });
+  gsap.to(document.body, { opacity: 1, duration: 0.3 });
   gsap.from('#topbar',      { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
   gsap.from('#phantomCard', { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.1 });
   gsap.from('#anonCard',    { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.2 });
