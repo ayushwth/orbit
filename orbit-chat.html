@@ -666,6 +666,18 @@
     font-size: 0.82rem;
     letter-spacing: 0.06em;
   }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .topbar { padding: 0.8rem 1rem; flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
+    .topbar-alias { display: none; } /* Hide alias on mobile to save topbar space */
+    .match-view { padding: 1rem; }
+    .card-stack { width: 85vw; height: 60vh; max-height: 480px; }
+    .match-card { padding: 1.5rem; }
+    .chat-view { flex-direction: column; height: 100%; overflow: hidden; }
+    .chat-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); height: 35%; flex-shrink: 0; }
+    .chat-main { flex: 1; min-height: 0; }
+  }
 </style>
 </head>
 <body style="opacity: 0; visibility: hidden;">

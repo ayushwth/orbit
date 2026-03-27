@@ -217,15 +217,16 @@
     color: var(--green-lit); z-index: 999; opacity: 0; pointer-events: none;
   }
 
-  /* CURSOR */
-  .cursor-dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); }
-  .cursor-ring { width: 24px; height: 24px; border: 1px solid rgba(200,67,42,0.5); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); }
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .page { grid-template-columns: 1fr; padding: 2rem 1.5rem; gap: 2rem; }
+    .profile-sidebar { position: relative; top: 0; }
+  }
 </style>
 </head>
 <body style="opacity: 0; visibility: hidden;">
 
-<div class="cursor-dot" id="cursorDot"></div>
-<div class="cursor-ring" id="cursorRing"></div>
+
 <div class="toast" id="toast">✦ Changes saved</div>
 
 <nav class="topbar" id="topbar">
@@ -460,20 +461,7 @@
 </div>
 
 <script>
-  // CURSOR
-  const dot = document.getElementById('cursorDot');
-  const ring = document.getElementById('cursorRing');
-  let mx = 0, my = 0, rx = 0, ry = 0;
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-  gsap.ticker.add(() => {
-    gsap.set(dot, { x: mx, y: my });
-    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
-    gsap.set(ring, { x: rx, y: ry });
-  });
-  document.querySelectorAll('button, a, .interest-tag, .pill, .addable-tag').forEach(el => {
-    el.addEventListener('mouseenter', () => gsap.to(ring, { scale: 1.8, opacity: 0.6, duration: 0.2 }));
-    el.addEventListener('mouseleave', () => gsap.to(ring, { scale: 1, opacity: 1, duration: 0.2 }));
-  });
+
 
   // ENTRANCE
   gsap.set(document.body, { visibility: 'visible' });

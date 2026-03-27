@@ -25,7 +25,6 @@
     color: var(--ink);
     font-family: 'DM Sans', sans-serif;
     overflow-x: hidden;
-    cursor: none;
   }
 
   /* Custom cursor */
@@ -550,16 +549,13 @@
     .chat-section { grid-template-columns: 1fr; gap: 3rem; }
     .section, .tags-section { padding: 5rem 2rem; }
     .interest-grid { grid-template-columns: repeat(2, 1fr); }
-    nav { padding: 1rem 2rem; }
-    nav ul { display: none; }
+    nav { padding: 1rem 1.5rem; flex-direction: column; gap: 0.8rem; align-items: center; }
+    nav ul { display: flex; flex-wrap: wrap; justify-content: center; }
     footer { flex-direction: column; gap: 1rem; align-items: flex-start; }
   }
 </style>
 </head>
 <body>
-
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="cursorRing"></div>
 
 <nav>
   <a class="logo" href="campus-connect.html">Orb<span>it</span></a>
@@ -567,6 +563,7 @@
     <li><a href="#how-it-works">How it works</a></li>
     <li><a href="#interests">Interests</a></li>
     <li><a href="#chat-preview">About</a></li>
+    <li><a href="orbit-login.html">Login</a></li>
     <li><a href="orbit-signup.html">Join</a></li>
   </ul>
 </nav>
@@ -574,7 +571,7 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-left">
-    <p class="eyebrow">BMSCE · Anonymous · Authentic</p>
+    <p class="eyebrow">BMSCE · Anonymous</p>
     <h1>Find your <em>people,</em><br>not your profile.</h1>
     <p class="hero-sub">Connect with students who share your interests and ideas — anonymously. No followers, no clout, just genuine conversations.</p>
     <div class="cta-row">
@@ -900,23 +897,7 @@
     });
   }
 
-  // ── CUSTOM CURSOR ──
-  const cursorDot  = document.getElementById('cursor');
-  const cursorRing = document.getElementById('cursorRing');
-  window.addEventListener('mousemove', e => {
-    gsap.to(cursorDot,  { x: e.clientX, y: e.clientY, duration: 0.08, ease: 'none' });
-    gsap.to(cursorRing, { x: e.clientX, y: e.clientY, duration: 0.3,  ease: 'power2.out' });
-  });
-  document.querySelectorAll('a, button, .interest-card, .step, .action-btn').forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      gsap.to(cursorRing, { scale: 2, opacity: 0.5, duration: 0.3, ease: 'power2.out' });
-      gsap.to(cursorDot,  { scale: 0.4, duration: 0.3 });
-    });
-    el.addEventListener('mouseleave', () => {
-      gsap.to(cursorRing, { scale: 1, opacity: 1, duration: 0.4, ease: 'elastic.out(1,0.5)' });
-      gsap.to(cursorDot,  { scale: 1, duration: 0.3 });
-    });
-  });
+
 
   // ── MARQUEE section: fade in ──
   gsap.from('.marquee-wrap', {
