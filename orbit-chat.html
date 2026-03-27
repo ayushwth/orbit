@@ -684,12 +684,12 @@
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-logo"><a href="campus-connect.html" style="text-decoration:none;color:inherit">Orb<em>it</em></a></div>
+  <div class="topbar-logo"><a href="/" style="text-decoration:none;color:inherit">Orb<em>it</em></a></div>
 
   <div class="topbar-tabs">
     <button class="tab-btn" onclick="switchView('match', this)">Discover</button>
     <button class="tab-btn" onclick="switchView('chat', this)">Messages</button>
-    <a href="orbit-profile.html" style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;color:rgba(232,228,220,0.45);text-decoration:none;padding:0.4rem 1rem;border:1px solid rgba(255,255,255,0.08);border-radius:999px;transition:all 0.2s;" onmouseover="this.style.color='#e8e4dc'" onmouseout="this.style.color='rgba(232,228,220,0.45)'">Profile</a>
+    <a href="/profile" style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;color:rgba(232,228,220,0.45);text-decoration:none;padding:0.4rem 1rem;border:1px solid rgba(255,255,255,0.08);border-radius:999px;transition:all 0.2s;" onmouseover="this.style.color='#e8e4dc'" onmouseout="this.style.color='rgba(232,228,220,0.45)'">Profile</a>
   </div>
   <div class="topbar-alias">You are <span>Phantom #7741</span></div>
 </div>
@@ -748,7 +748,7 @@
   // ── AUTH & STATE ──
   const token = localStorage.getItem('orbit_token');
   if (!token) {
-    window.location.href = 'orbit-login.html';
+    window.location.href = '/login';
   }
 
   let me = null;
@@ -819,7 +819,7 @@
 
     } catch (err) {
       console.error(err);
-      window.location.href = 'orbit-login.html';
+      window.location.href = '/login';
     }
   }
 

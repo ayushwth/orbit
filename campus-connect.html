@@ -100,6 +100,18 @@
     background: var(--accent);
     border-color: var(--accent);
   }
+  
+  nav ul li a.login-btn {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    box-shadow: none;
+  }
+  nav ul li a.login-btn:hover {
+    background: var(--accent);
+    color: var(--paper);
+    box-shadow: 0 4px 16px rgba(200,67,42,0.25);
+  }
 
   /* HERO */
   .hero {
@@ -552,19 +564,29 @@
     nav { padding: 1rem 1.5rem; flex-direction: column; gap: 0.8rem; align-items: center; }
     nav ul { display: flex; flex-wrap: wrap; justify-content: center; }
     footer { flex-direction: column; gap: 1rem; align-items: flex-start; }
+    
+    /* Shrink the chat preview window to fit tiny smartphone screens without leaking horizontal edges */
+    .chat-window { border-radius: 4px; width: 100%; border: 1px solid var(--border); }
+    .chat-header { padding: 0.8rem 1rem; }
+    .anon-badge { display: none; } /* Hide alias tag on tight screens */
+    .chat-body { padding: 1rem; gap: 0.8rem; }
+    .msg { font-size: 0.8rem; padding: 0.7rem 0.85rem; max-width: 90%; }
+    .chat-input-row { padding: 0.8rem 1rem; gap: 0.5rem; }
+    .chat-input { min-width: 0; padding: 0.6rem 0.8rem; font-size: 0.8rem; }
+    .send-btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
   }
 </style>
 </head>
 <body>
 
 <nav>
-  <a class="logo" href="campus-connect.html">Orb<span>it</span></a>
+  <a class="logo" href="/">Orb<span>it</span></a>
   <ul>
     <li><a href="#how-it-works">How it works</a></li>
     <li><a href="#interests">Interests</a></li>
     <li><a href="#chat-preview">About</a></li>
-    <li><a href="orbit-login.html">Login</a></li>
-    <li><a href="orbit-signup.html">Join</a></li>
+    <li><a href="/login" class="login-btn">Login</a></li>
+    <li><a href="/signup">Join</a></li>
   </ul>
 </nav>
 
@@ -575,7 +597,7 @@
     <h1>Find your <em>people,</em><br>not your profile.</h1>
     <p class="hero-sub">Connect with students who share your interests and ideas — anonymously. No followers, no clout, just genuine conversations.</p>
     <div class="cta-row">
-      <a href="orbit-signup.html" class="btn-primary"><span>Get Early Access</span></a>
+      <a href="/signup" class="btn-primary"><span>Get Early Access</span></a>
       <a href="#how-it-works" class="btn-secondary">See how it works</a>
     </div>
   </div>
@@ -619,7 +641,7 @@
   <h2 class="section-title">What are <em>you</em> into?</h2>
   <div class="interest-grid" id="interestGrid"></div>
   <div class="tags-cta">
-    <button class="tags-cta-btn" onclick="window.location.href='orbit-signup.html'">Find My People →</button>
+    <button class="tags-cta-btn" onclick="window.location.href='/signup'">Find My People →</button>
     <p class="tags-selected-count"><span id="selCount">0</span> interests selected</p>
   </div>
 </section>

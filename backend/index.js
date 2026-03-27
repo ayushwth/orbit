@@ -26,10 +26,12 @@ app.use('/admin', adminRoutes);
 const path = require('path');
 app.use(express.static(path.join(__dirname, '../')));
 
-// Serve landing page as the absolute default entry
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../campus-connect.html'));
-});
+// Serve clean routes dynamically!
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../campus-connect.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '../orbit-login.html')));
+app.get('/signup', (req, res) => res.sendFile(path.join(__dirname, '../orbit-signup.html')));
+app.get('/chat', (req, res) => res.sendFile(path.join(__dirname, '../orbit-chat.html')));
+app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, '../orbit-profile.html')));
 
 // Fallback Basic route for API root
 app.get('/api', (req, res) => {
