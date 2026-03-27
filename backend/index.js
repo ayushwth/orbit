@@ -17,21 +17,23 @@ const matchRoutes = require('./routes/match');
 const chatRoutes = require('./routes/chat');
 const adminRoutes = require('./routes/admin');
 
-app.use('/auth', authRoutes);
-app.use('/match', matchRoutes);
-app.use('/chat', chatRoutes);
-app.use('/admin', adminRoutes);
-
-// Serve static frontend files from parent directory
 const path = require('path');
-app.use(express.static(path.join(__dirname, '../')));
 
-// Serve clean routes dynamically!
+// Serve clean routes dynamically FIRST so they don't get intercepted by the protected API endpoints
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../campus-connect.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '../orbit-login.html')));
 app.get('/signup', (req, res) => res.sendFile(path.join(__dirname, '../orbit-signup.html')));
 app.get('/chat', (req, res) => res.sendFile(path.join(__dirname, '../orbit-chat.html')));
 app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, '../orbit-profile.html')));
+
+// Base API Routes
+app.use('/auth', authRoutes);
+app.use('/match', matchRoutes);
+app.use('/chat', chatRoutes);
+app.use('/admin', adminRoutes);
+
+// Serve background static frontend files (CSS, Images, etc)
+app.use(express.static(path.join(__dirname, '../')));
 
 // Fallback Basic route for API root
 app.get('/api', (req, res) => {
