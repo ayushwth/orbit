@@ -26,9 +26,9 @@ app.use('/admin', adminRoutes);
 const path = require('path');
 app.use(express.static(path.join(__dirname, '../')));
 
-// Serve login page as the absolute default entry
+// Serve landing page as the absolute default entry
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../orbit-login.html'));
+    res.sendFile(path.join(__dirname, '../campus-connect.html'));
 });
 
 // Fallback Basic route for API root
